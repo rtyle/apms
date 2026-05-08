@@ -52,7 +52,7 @@ for supporting an external I²C sensor
 that can be threaded (by adapter) into a schrader valve.
 By using a T adapter off the tank's schrader valve we can both monitor and maintain its pressure.
 
-* [CPS (AVT45)](1/4″ SAE Male x 1/4″ SAE Female Knurl x 1/4″ SAE Male Brass T Adapter)
+* [CPS 1/4″ SAE Male x 1/4″ SAE Female Knurl x 1/4″ SAE Male Brass T Adapter (AVT45)](https://www.cpsproducts.com/product-details/avt45/)
     [Amazon](https://www.amazon.com/dp/B076CPKR6S)
 * [Godeson Air Chuck (A38)](https://www.nbgodeson.com/en/productshow-1771.html)
     [Amazon](https://www.amazon.com/dp/B07JMNGBRG)
