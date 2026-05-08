@@ -54,7 +54,7 @@ output: *m5stack_atoms3r_output
 
 light:
   <<: *m5stack_atoms3r_light
-  id: _light
+  id: light_
 
 spi: *m5stack_atoms3r_spi
 
@@ -65,8 +65,6 @@ display:
     update_interval: 1ms
 
 ethernet: *m5stack_atomic_poe_base_ethernet
-
-asio_:
 
 logger:
   level: LOGGER_LEVEL
@@ -105,6 +103,29 @@ sensor:
       name: debug psram
     cpu_frequency:
       name: debug cpu_frequency
+  - platform: tem3200
+    id: tem3200_
+    raw_pressure:
+      id: raw_pressure_
+      internal: true
+    temperature:
+      name: Temperature
+  - platform: template
+    name: Pressure
+    unit_of_measurement: PSI
+    state_class: measurement
+    device_class: pressure
+    lambda: |-
+      return id(raw_pressure_).state;
+    filters:
+      - calibrate_linear:
+          - 1000 -> 0.0
+          - 1700 -> 5.0
+          - 2400 -> 10.0
+          - 8000 -> 50.0
+          - 13600 -> 90.0
+          - 14300 -> 95.0
+          - 15000 -> 100.0
 
 define(`_repeat', `ifelse(0, `$1', `', `$2`'_repeat(decr(`$1'), `$2')')')dnl
 define(`_indent', `_repeat(`$1', `  ')')dnl
@@ -112,7 +133,10 @@ define(`_smtp_send_', `_indent($1)- smtp_.send:
 _indent(eval(2+$1))subject: NAME $2
 ')dnl
 define(`_smtp_send', `')dnl
-define(`_smtp_define', `$1`'define(`_smtp_send', defn(`_smtp_send_'))')dnl
+define(`_smtp_define', asio_:
+
+`$1`'define(`_smtp_send', defn(`_smtp_send_'))')dnl
 sinclude(SMTP)dnl
 undefine(`_smtp_define')dnl
 dnl
+lvgl:
