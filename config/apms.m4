@@ -24,6 +24,14 @@ dnl
 dnl   -DSMTP=smtp
 dnl     Value is the name of the file that declares the smtp_ component
 ifdef(`SMTP', `', `define(`SMTP', `smtp.m4')')dnl
+dnl
+dnl   -DUNITS=units
+dnl     Value is units of THRESHOLD (psi or mbar)
+ifdef(`UNITS', `', `define(`UNITS', `psi')')dnl
+dnl
+dnl   -DTHRESHOLD=threshold
+dnl     Value is number of UNITS of pressure that is alarming
+ifdef(`THRESHOLD', `', `define(`THRESHOLD', `80')')dnl
 ---
 
 include(m5stack_atoms3r.m4)dnl
@@ -91,6 +99,18 @@ text_sensor:
     reset_reason:
       name: debug reset_reason
 
+define(`_repeat', `ifelse(0, `$1', `', `$2`'_repeat(decr(`$1'), `$2')')')dnl
+define(`_indent', `_repeat(`$1', `  ')')dnl
+define(`_smtp_send_', `_indent($1)- smtp_.send:
+_indent(eval(2+$1))subject: $2
+')dnl
+define(`_smtp_send', `')dnl
+define(`_smtp_define', asio_:
+
+`$1`'define(`_smtp_send', defn(`_smtp_send_'))')dnl
+sinclude(SMTP)dnl
+undefine(`_smtp_define')dnl
+dnl
 sensor:
   - platform: debug
     free:
@@ -103,15 +123,31 @@ sensor:
       name: debug psram
     cpu_frequency:
       name: debug cpu_frequency
+
   - platform: tem3200
     id: tem3200_
+    update_interval: 60s
+    temperature:
+      name: temperature
     raw_pressure:
       id: raw_pressure_
       internal: true
-    temperature:
-      name: Temperature
+      on_value:
+        - component.update: pressure_psi_
+        - component.update: pressure_mbar_
+        - if:
+            condition:
+              lambda: return id(pressure_`'UNITS`'_).state > THRESHOLD;
+            then:
+              - logger.log:
+                  level: WARN
+                  format: "NAME pressure (%.2f UNITS) is too high"
+                  args: [id(pressure_`'UNITS`'_).state]
+_smtp_send(7, `!lambda return str_sprintf("NAME pressure (%:.2f UNITS) is too high", id(pressure_`'UNITS`'_).state);')dnl
+
   - platform: template
-    name: Pressure
+    id: pressure_psi_
+    update_interval: never
     unit_of_measurement: PSI
     state_class: measurement
     device_class: pressure
@@ -119,24 +155,25 @@ sensor:
       return id(raw_pressure_).state;
     filters:
       - calibrate_linear:
-          - 1000 -> 0.0
-          - 1700 -> 5.0
-          - 2400 -> 10.0
-          - 8000 -> 50.0
-          - 13600 -> 90.0
-          - 14300 -> 95.0
-          - 15000 -> 100.0
+          - 1000 -> 0
+          - 1700 -> 5
+          - 2400 -> 10
+          - 8000 -> 50
+          - 13600 -> 90
+          - 14300 -> 95
+          - 15000 -> 100
 
-define(`_repeat', `ifelse(0, `$1', `', `$2`'_repeat(decr(`$1'), `$2')')')dnl
-define(`_indent', `_repeat(`$1', `  ')')dnl
-define(`_smtp_send_', `_indent($1)- smtp_.send:
-_indent(eval(2+$1))subject: NAME $2
-')dnl
-define(`_smtp_send', `')dnl
-define(`_smtp_define', asio_:
+  - platform: template
+    id: pressure_mbar_
+    update_interval: never
+    unit_of_measurement: mbar
+    state_class: measurement
+    device_class: pressure
+    lambda: |-
+      return id(pressure_psi_).state;
+    filters:
+      - calibrate_linear:
+          - 0 -> 0
+          - 1 -> 68.9476
 
-`$1`'define(`_smtp_send', defn(`_smtp_send_'))')dnl
-sinclude(SMTP)dnl
-undefine(`_smtp_define')dnl
-dnl
 lvgl:
