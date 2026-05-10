@@ -52,8 +52,6 @@ esp32: *m5stack_atoms3r_esp32
 
 psram: *m5stack_atoms3r_psram
 
-binary_sensor: *m5stack_atoms3r_binary_sensor
-
 i2c: *m5stack_atoms3r_i2c
 
 lp5562: *m5stack_atoms3r_lp5562
@@ -64,6 +62,47 @@ light:
   <<: *m5stack_atoms3r_light
   id: light_
 
+globals:
+  - id: light_brightness_target_
+    type: float
+    initial_value: '1.0'
+    restore_value: yes
+
+binary_sensor:
+  <<: *m5stack_atoms3r_binary_sensor
+  on_press:
+    - light.turn_on:
+        id: light_
+        brightness: !lambda "return id(light_brightness_target_);"
+        transition_length: !lambda |-
+          return (uint32_t)(2000.0f
+            * std::abs(id(light_brightness_target_)
+            - id(light_).remote_values.get_brightness()));
+  on_release:
+    - if:
+        condition:
+          lambda: return 0.0f == id(light_).current_values.get_brightness();
+        then:
+          - globals.set:
+              id: light_brightness_target_
+              value: "1.0"
+          - light.turn_off:
+              id: light_
+              transition_length: 0ms
+        else:
+          - if:
+              condition:
+                lambda: return 1.0f == id(light_).current_values.get_brightness();
+              then:
+                - globals.set:
+                    id: light_brightness_target_
+                    value: "0.0"
+              else:
+                - light.turn_on:
+                    id: light_
+                    transition_length: 0ms
+                    brightness: !lambda return id(light_).current_values.get_brightness();
+          
 spi: *m5stack_atoms3r_spi
 
 display:
@@ -141,9 +180,9 @@ sensor:
             then:
               - logger.log:
                   level: WARN
-                  format: "NAME pressure (%.2f UNITS) is too high"
+                  format: "NAME pressure (%.2f UNITS) > THRESHOLD"
                   args: [id(pressure_`'UNITS`'_).state]
-_smtp_send(7, `!lambda return str_sprintf("NAME pressure (%:.2f UNITS) is too high", id(pressure_`'UNITS`'_).state);')dnl
+_smtp_send(7, `!lambda return str_sprintf("NAME pressure (%:.2f UNITS) > THRESHOLD", id(pressure_`'UNITS`'_).state);')dnl
 
   - platform: template
     id: pressure_psi_
