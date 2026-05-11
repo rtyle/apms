@@ -120,8 +120,6 @@ define(M5STACK_ATOM_BUS_1_04, GPIO8)dnl
       dimensions:
         height: 128
         width: 128
-        offset_width: 2
-        offset_height: 1
       invert_colors: true
 
 undefine(`namespace')dnl

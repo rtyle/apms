@@ -25,12 +25,17 @@ dnl   -DSMTP=smtp
 dnl     Value is the name of the file that declares the smtp_ component
 ifdef(`SMTP', `', `define(`SMTP', `smtp.m4')')dnl
 dnl
-dnl   -DUNITS=units
-dnl     Value is units of THRESHOLD (psi or mbar)
-ifdef(`UNITS', `', `define(`UNITS', `psi')')dnl
+dnl   -DTEMPERATURE_UNITS=units
+dnl     Value is units (°F or °C) of temperature label
+ifdef(`TEMPERATURE_UNITS', `', `define(`TEMPERATURE_UNITS', `°F')')dnl
+ifdef(`TEMPERATURE_UNITS', `define(`TEMPERATURE_UNITS', translit(TEMPERATURE_UNITS, `a-z', `A-Z'))', `define(`TEMPERATURE_UNITS', `°F')')dnl
+dnl
+dnl   -DPRESSURE_UNITS=units
+dnl     Value is units (psi or mbar) of pressure label and THRESHOLD
+ifdef(`PRESSURE_UNITS', `define(`PRESSURE_UNITS', translit(PRESSURE_UNITS, `A-Z', `a-z'))', `define(`PRESSURE_UNITS', `psi')')dnl
 dnl
 dnl   -DTHRESHOLD=threshold
-dnl     Value is number of UNITS of pressure that is alarming
+dnl     Pressure over threshold is alarming
 ifdef(`THRESHOLD', `', `define(`THRESHOLD', `80')')dnl
 ---
 
@@ -75,7 +80,7 @@ binary_sensor:
         id: light_
         brightness: !lambda "return id(light_brightness_target_);"
         transition_length: !lambda |-
-          return (uint32_t)(2000.0f
+          return static_cast<uint32_t>(2000.0f
             * std::abs(id(light_brightness_target_)
             - id(light_).remote_values.get_brightness()));
   on_release:
@@ -109,7 +114,7 @@ display:
   - <<: *m5stack_atoms3r_display
     id: display_
     auto_clear_enabled: false
-    update_interval: 1ms
+    update_interval: never
 
 ethernet: *m5stack_atomic_poe_base_ethernet
 
@@ -166,8 +171,16 @@ sensor:
   - platform: tem3200
     id: tem3200_
     update_interval: 60s
+
     temperature:
-      name: temperature
+      id: temperature_celsius_
+      on_value:
+        - component.update: temperature_fahrenheit_`'dnl
+ifelse(TEMPERATURE_UNITS, `°C', `
+        - lvgl.label.update:
+            id: temperature_label_
+            text: !lambda return str_sprintf("%.2f TEMPERATURE_UNITS", x);')
+
     raw_pressure:
       id: raw_pressure_
       internal: true
@@ -176,13 +189,31 @@ sensor:
         - component.update: pressure_mbar_
         - if:
             condition:
-              lambda: return id(pressure_`'UNITS`'_).state > THRESHOLD;
+              lambda: return id(pressure_`'PRESSURE_UNITS`'_).state > THRESHOLD;
             then:
               - logger.log:
                   level: WARN
-                  format: "NAME pressure (%.2f UNITS) > THRESHOLD"
-                  args: [id(pressure_`'UNITS`'_).state]
-_smtp_send(7, `!lambda return str_sprintf("NAME pressure (%:.2f UNITS) > THRESHOLD", id(pressure_`'UNITS`'_).state);')dnl
+                  format: "NAME pressure (%.2f PRESSURE_UNITS) > THRESHOLD"
+                  args: [id(pressure_`'PRESSURE_UNITS`'_).state]
+_smtp_send(7, `!lambda return str_sprintf("NAME pressure (%:.2f PRESSURE_UNITS) > THRESHOLD", id(pressure_`'PRESSURE_UNITS`'_).state);')dnl
+
+  - platform: template
+    id: temperature_fahrenheit_
+    update_interval: never
+    unit_of_measurement: °F
+    state_class: measurement
+    device_class: temperature
+    lambda: |-
+      return id(temperature_celsius_).state;
+    filters:
+      - calibrate_linear:
+          - 0 -> 32
+          - 100 -> 212`'dnl
+ifelse(TEMPERATURE_UNITS, `°F', `
+    on_value:
+      - lvgl.label.update:
+          id: temperature_label_
+          text: !lambda return str_sprintf("%.2f TEMPERATURE_UNITS", x);')
 
   - platform: template
     id: pressure_psi_
@@ -200,7 +231,12 @@ _smtp_send(7, `!lambda return str_sprintf("NAME pressure (%:.2f UNITS) > THRESHO
           - 8000 -> 50
           - 13600 -> 90
           - 14300 -> 95
-          - 15000 -> 100
+          - 15000 -> 100`'dnl
+ifelse(PRESSURE_UNITS, `psi', `
+    on_value:
+      - lvgl.label.update:
+          id: pressure_label_
+          text: !lambda return str_sprintf("%.2f PRESSURE_UNITS", x);')
 
   - platform: template
     id: pressure_mbar_
@@ -213,6 +249,45 @@ _smtp_send(7, `!lambda return str_sprintf("NAME pressure (%:.2f UNITS) > THRESHO
     filters:
       - calibrate_linear:
           - 0 -> 0
-          - 1 -> 68.9476
+          - 1 -> 68.9476`'dnl
+ifelse(PRESSURE_UNITS, `mbar', `
+    on_value:
+      - lvgl.label.update:
+          id: pressure_label_
+          text: !lambda return str_sprintf("%.2f PRESSURE_UNITS", x);')
+
+image:
+  - id: apms_
+    file: apms.png
+    type: rgb565
+    resize: 128x128
 
 lvgl:
+  pages:
+    - id: image_page_
+      widgets:
+        - image:
+            src: apms_
+            on_boot:
+              - delay: 4s
+              - lvgl.page.next:
+    - id: widget_page_
+      widgets:
+        - obj:
+            width: 100%
+            height: 100%
+            layout:
+              type: flex
+              flex_flow: column
+              pad_row: 0
+            widgets:
+              - label:
+                  id: pressure_label_
+                  text: "pressure"
+                  flex_grow: 1
+                  width: 100%
+              - label:
+                  id: temperature_label_
+                  text: "temperature"
+                  flex_grow: 1
+                  width: 100%
