@@ -145,21 +145,20 @@ text_sensor:
 
 define(`_repeat', `ifelse(0, `$1', `', `$2`'_repeat(decr(`$1'), `$2')')')dnl
 define(`_indent', `_repeat(`$1', `  ')')dnl
-define(`_smtp_send_', `_indent($1)- smtp_.send:
+define(`_smtp_send', `_indent($1)- smtp_.send:
 _indent(eval(2+$1))subject: $2
 ')dnl
-define(`_smtp_send', `')dnl
 define(`_smtp_define', asio_:
 
-`$1`'define(`_smtp_send', defn(`_smtp_send_'))')dnl
+`$1`'define(`_smtp_defined')')dnl
 sinclude(SMTP)dnl
 undefine(`_smtp_define')dnl
 dnl
 switch:
   - platform: template
     id: pressure_alarm_
-    optimistic: true`'dnl
-ifdef(`_smtp_send', `
+    optimistic: true
+ifdef(`_smtp_defined', `dnl
     on_turn_on:
 _smtp_send(3, `!lambda return str_sprintf("NAME pressure (%:.2f PRESSURE_UNITS) >= THRESHOLD", id(pressure_`'PRESSURE_UNITS`'_).state);')dnl
     on_turn_off:
@@ -192,7 +191,7 @@ ifelse(TEMPERATURE_UNITS, `°C', `
             text: !lambda return str_sprintf("%.2f TEMPERATURE_UNITS", x);')
 
     raw_pressure:
-      id: raw_pressure_
+      id: pressure_
       internal: true
       on_value:
         - component.update: pressure_psi_
@@ -208,7 +207,7 @@ ifelse(TEMPERATURE_UNITS, `°C', `
               - switch.turn_on: pressure_alarm_
             else:
               - logger.log:
-                  level: DEBUG
+                  level: INFO
                   format: "NAME pressure (%.2f PRESSURE_UNITS) < THRESHOLD"
                   args: [id(pressure_`'PRESSURE_UNITS`'_).state]
               - switch.turn_off: pressure_alarm_
@@ -238,7 +237,7 @@ ifelse(TEMPERATURE_UNITS, `°F', `
     state_class: measurement
     device_class: pressure
     lambda: |-
-      return id(raw_pressure_).state;
+      return id(pressure_).state;
     filters:
       - calibrate_linear:
           - 1000 -> 0

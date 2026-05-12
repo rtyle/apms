@@ -76,7 +76,7 @@ define(M5STACK_ATOM_BUS_1_04, GPIO8)dnl
       internal: true
 
   i2c: &namespace`'_i2c
-    id: i2c_
+    id: namespace`'_i2c
     scl:
       number: indir(NAMESPACE`'_I2C_SCL)
       ignore_strapping_warning: true
@@ -86,7 +86,7 @@ define(M5STACK_ATOM_BUS_1_04, GPIO8)dnl
 
   lp5562: &namespace`'_lp5562
     id: namespace`'_lp5562
-    i2c_id: i2c_
+    i2c_id: namespace`'_i2c
     use_internal_clk: true
     high_pwm_freq: true
     logarithmic_dimming: true
@@ -104,7 +104,7 @@ define(M5STACK_ATOM_BUS_1_04, GPIO8)dnl
       restore_mode: RESTORE_DEFAULT_ON
 
   spi: &namespace`'_spi
-    id: spi_
+    id: namespace`'_spi
     interface: spi2
     clk_pin: indir(NAMESPACE`'_SPI_CLK)
     mosi_pin: indir(NAMESPACE`'_SPI_MOSI)
