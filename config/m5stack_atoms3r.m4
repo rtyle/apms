@@ -88,9 +88,8 @@ define(M5STACK_ATOM_BUS_1_04, GPIO8)dnl
     id: namespace`'_lp5562
     i2c_id: i2c_
     use_internal_clk: true
-    # power_save_mode: true
-    # high_pwm_freq: true
-    # logarithmic_dimming: true
+    high_pwm_freq: true
+    logarithmic_dimming: true
     white_current: 17.5
 
   output: &namespace`'_output
