@@ -35,7 +35,7 @@ dnl     Value is units (psi or mbar) of pressure label and THRESHOLD
 ifdef(`PRESSURE_UNITS', `define(`PRESSURE_UNITS', translit(PRESSURE_UNITS, `A-Z', `a-z'))', `define(`PRESSURE_UNITS', `psi')')dnl
 dnl
 dnl   -DTHRESHOLD=threshold
-dnl     Pressure over threshold is alarming
+dnl     Pressure at or over threshold is alarming
 ifdef(`THRESHOLD', `', `define(`THRESHOLD', `80')')dnl
 ---
 
@@ -155,6 +155,16 @@ define(`_smtp_define', asio_:
 sinclude(SMTP)dnl
 undefine(`_smtp_define')dnl
 dnl
+switch:
+  - platform: template
+    id: pressure_alarm_
+    optimistic: true`'dnl
+ifdef(`_smtp_send', `
+    on_turn_on:
+_smtp_send(3, `!lambda return str_sprintf("NAME pressure (%:.2f PRESSURE_UNITS) >= THRESHOLD", id(pressure_`'PRESSURE_UNITS`'_).state);')dnl
+    on_turn_off:
+_smtp_send(3, `!lambda return str_sprintf("NAME pressure (%:.2f PRESSURE_UNITS) < THRESHOLD", id(pressure_`'PRESSURE_UNITS`'_).state);')')dnl
+
 sensor:
   - platform: debug
     free:
@@ -189,13 +199,19 @@ ifelse(TEMPERATURE_UNITS, `°C', `
         - component.update: pressure_mbar_
         - if:
             condition:
-              lambda: return id(pressure_`'PRESSURE_UNITS`'_).state > THRESHOLD;
+              lambda: return id(pressure_`'PRESSURE_UNITS`'_).state >= THRESHOLD;
             then:
               - logger.log:
                   level: WARN
-                  format: "NAME pressure (%.2f PRESSURE_UNITS) > THRESHOLD"
+                  format: "NAME pressure (%.2f PRESSURE_UNITS) >= THRESHOLD"
                   args: [id(pressure_`'PRESSURE_UNITS`'_).state]
-_smtp_send(7, `!lambda return str_sprintf("NAME pressure (%:.2f PRESSURE_UNITS) > THRESHOLD", id(pressure_`'PRESSURE_UNITS`'_).state);')dnl
+              - switch.turn_on: pressure_alarm_
+            else:
+              - logger.log:
+                  level: DEBUG
+                  format: "NAME pressure (%.2f PRESSURE_UNITS) < THRESHOLD"
+                  args: [id(pressure_`'PRESSURE_UNITS`'_).state]
+              - switch.turn_off: pressure_alarm_
 
   - platform: template
     id: temperature_fahrenheit_
