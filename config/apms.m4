@@ -43,11 +43,15 @@ include(m5stack_atoms3r.m4)dnl
 include(m5stack_atomic_poe_base.m4)dnl
 external_components:
   - <<: *m5stack_atoms3r_external_components
-  - source:
-      type: git
-      url: https://github.com/rtyle/ping4pow
-      ref: master
+define(`_smtp_define', `define(`_smtp_defined')dnl
+  - source: github://rtyle/ping4pow@master
     components: [asio_, smtp_]
+
+asio_:
+
+`$1'')dnl
+sinclude(SMTP)dnl
+undefine(`_smtp_define')dnl
 
 esphome:
   <<: *m5stack_atoms3r_esphome
@@ -143,26 +147,17 @@ text_sensor:
     reset_reason:
       name: debug reset_reason
 
-define(`_repeat', `ifelse(0, `$1', `', `$2`'_repeat(decr(`$1'), `$2')')')dnl
-define(`_indent', `_repeat(`$1', `  ')')dnl
-define(`_smtp_send', `_indent($1)- smtp_.send:
-_indent(eval(2+$1))subject: $2
-')dnl
-define(`_smtp_define', asio_:
-
-`$1`'define(`_smtp_defined')')dnl
-sinclude(SMTP)dnl
-undefine(`_smtp_define')dnl
-dnl
 switch:
   - platform: template
     id: pressure_alarm_
-    optimistic: true
-ifdef(`_smtp_defined', `dnl
-    on_turn_on:
-_smtp_send(3, `!lambda return str_sprintf("NAME pressure (%:.2f PRESSURE_UNITS) >= THRESHOLD", id(pressure_`'PRESSURE_UNITS`'_).state);')dnl
+    optimistic: true`'dnl
+ifdef(`_smtp_defined', `
     on_turn_off:
-_smtp_send(3, `!lambda return str_sprintf("NAME pressure (%:.2f PRESSURE_UNITS) < THRESHOLD", id(pressure_`'PRESSURE_UNITS`'_).state);')')dnl
+      - smtp_.send:
+          subject: !lambda return str_sprintf("apms pressure (%:.2f PRESSURE_UNITS) < THRESHOLD", id(pressure_`'PRESSURE_UNITS`'_).state);
+    on_turn_on:
+      - smtp_.send:
+          subject: !lambda return str_sprintf("apms pressure (%:.2f PRESSURE_UNITS) >= THRESHOLD", id(pressure_`'PRESSURE_UNITS`'_).state);')
 
 sensor:
   - platform: debug
@@ -198,19 +193,19 @@ ifelse(TEMPERATURE_UNITS, `°C', `
         - component.update: pressure_mbar_
         - if:
             condition:
-              lambda: return id(pressure_`'PRESSURE_UNITS`'_).state >= THRESHOLD;
+              lambda: return id(pressure_`'PRESSURE_UNITS`'_).state < THRESHOLD;
             then:
-              - logger.log:
-                  level: WARN
-                  format: "NAME pressure (%.2f PRESSURE_UNITS) >= THRESHOLD"
-                  args: [id(pressure_`'PRESSURE_UNITS`'_).state]
-              - switch.turn_on: pressure_alarm_
-            else:
               - logger.log:
                   level: INFO
                   format: "NAME pressure (%.2f PRESSURE_UNITS) < THRESHOLD"
                   args: [id(pressure_`'PRESSURE_UNITS`'_).state]
               - switch.turn_off: pressure_alarm_
+            else:
+              - logger.log:
+                  level: WARN
+                  format: "NAME pressure (%.2f PRESSURE_UNITS) >= THRESHOLD"
+                  args: [id(pressure_`'PRESSURE_UNITS`'_).state]
+              - switch.turn_on: pressure_alarm_
 
   - platform: template
     id: temperature_fahrenheit_
