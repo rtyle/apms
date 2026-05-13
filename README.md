@@ -2,9 +2,10 @@
 
 ## Motivation
 
-The air pressure behind a thermal expansion tank's bladder should be monitored
-to ensure the tank's effectiveness.
-The tank will have a shrader valve on it that can be used
+The air pressure behind a thermal
+[expansion tank](https://en.wikipedia.org/wiki/Expansion_tank)'s
+bladder should be monitored to ensure the tank's effectiveness.
+The tank will have a [Schrader valve](https://en.wikipedia.org/wiki/Schrader_valve) on it that can be used
 to pressurize the tank and, with a pressure monitoring sensor, monitor it.
 
 There are Tire Pressure Monitoring System (TPMS) sensors 
@@ -49,8 +50,8 @@ PoE power must be provided through a capable switch port or PoE injector.
 
 AtomS3R has a standard [Grove](https://wiki.seeedstudio.com/Grove_System/) connector (HY2.0-4P)
 for supporting an external I²C sensor
-that can be threaded (by adapter) into a schrader valve.
-By using a T adapter off the tank's schrader valve we can both monitor and maintain its pressure.
+that can be threaded (by adapter) into a Schrader valve.
+By using a T adapter off the tank's Schrader valve we can both monitor and maintain its pressure.
 
 * [HawksHead T-Valve Adapter for TMPS Tires (TV1A)](https://www.hawksheadsystems.com/t%20valve%20adapters.html)
     [tpms.ca](https://tpms.ca/products/t-valve-adapters)
