@@ -89,51 +89,79 @@ spi: *m5stack_atoms3r_spi
 ethernet: *m5stack_atomic_poe_base_ethernet
 
 globals:
+  - id: button_held_
+    type: bool
+    initial_value: "false"
   - id: light_brightness_target_
     type: float
-    initial_value: "1.0"
+    initial_value: "1.0f"
     restore_value: yes
 
 light:
-  # a completed turn_on action to brightness 0 will turn the light off with brightness 1
+  # a completed turn_on action to brightness 0 will turn the light off but with brightness 1
   <<: *m5stack_atoms3r_light
   id: light_
   restore_mode: RESTORE_DEFAULT_ON
 
 binary_sensor:
   <<: *m5stack_atoms3r_binary_sensor
+  id: button_
   on_press:
-    - logger.log: on_press light.turn_on
-    - light.turn_on:
-        id: light_
-        brightness: !lambda return id(light_brightness_target_);
-        transition_length: !lambda |-
-          return static_cast<uint32_t>(2000.0f * (
-            std::abs(id(light_brightness_target_) - id(light_).remote_values.get_brightness())));
-  on_release:
+    - globals.set:
+        id: button_held_
+        value: "false"
+    - delay: 300ms
     - if:
         condition:
-          lambda: return !id(light_).current_values.is_on();
+          lambda: return id(button_).state;
         then:
-          - logger.log: on_release light_brightness_target 0 → 1
           - globals.set:
-              id: light_brightness_target_
-              value: "1.0"
-        else:
-          - if:
-              condition:
-                lambda: return 1.0f == id(light_).current_values.get_brightness();
-              then:
-                - logger.log: on_release light_brightness_target 1 → 0
-                - globals.set:
-                    id: light_brightness_target_
-                    value: "0.0"
-              else:
-                - logger.log: on_release light.turn_on
-                - light.turn_on:
-                    id: light_
-                    transition_length: 0ms
-                    brightness: !lambda return id(light_).current_values.get_brightness();
+              id: button_held_
+              value: "true"
+          - light.turn_on:
+              id: light_
+              brightness: !lambda return id(light_brightness_target_);
+              transition_length: !lambda |-
+                return static_cast<uint32_t>(2000.0f * (
+                  std::abs(id(light_brightness_target_) - id(light_).remote_values.get_brightness())));
+  on_release:
+    if:
+      condition:
+        lambda: return !id(button_held_);
+      then:
+        - if:
+            condition:
+              light.is_off: light_
+            then:
+              - light.turn_on:
+                  id: light_
+                  transition_length: 0ms
+                  brightness: 1.0
+              - globals.set:
+                  id: light_brightness_target_
+                  value: "0.0f"
+        - lvgl.page.next:
+      else:
+        - if:
+            condition:
+              light.is_off: light_
+            then:
+              globals.set:
+                id: light_brightness_target_
+                value: "1.0f"
+            else:
+              - if:
+                  condition:
+                    lambda: return 1.0f == id(light_).current_values.get_brightness();
+                  then:
+                    globals.set:
+                      id: light_brightness_target_
+                      value: "0.0f"
+                  else:
+                    light.turn_on:
+                      id: light_
+                      transition_length: 0ms
+                      brightness: !lambda return id(light_).current_values.get_brightness();
           
 display:
   - <<: *m5stack_atoms3r_display
