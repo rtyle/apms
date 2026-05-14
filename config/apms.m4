@@ -52,76 +52,6 @@ asio_:
 `$1'')dnl
 sinclude(SMTP)dnl
 undefine(`_smtp_define')dnl
-
-esphome:
-  <<: *m5stack_atoms3r_esphome
-  name: NAME
-
-esp32: *m5stack_atoms3r_esp32
-
-psram: *m5stack_atoms3r_psram
-
-i2c: *m5stack_atoms3r_i2c
-
-lp5562: *m5stack_atoms3r_lp5562
-
-output: *m5stack_atoms3r_output
-
-light:
-  <<: *m5stack_atoms3r_light
-  id: light_
-
-globals:
-  - id: light_brightness_target_
-    type: float
-    initial_value: '1.0'
-    restore_value: yes
-
-binary_sensor:
-  <<: *m5stack_atoms3r_binary_sensor
-  on_press:
-    - light.turn_on:
-        id: light_
-        brightness: !lambda "return id(light_brightness_target_);"
-        transition_length: !lambda |-
-          return static_cast<uint32_t>(2000.0f
-            * std::abs(id(light_brightness_target_)
-            - id(light_).remote_values.get_brightness()));
-  on_release:
-    - if:
-        condition:
-          lambda: return 0.0f == id(light_).current_values.get_brightness();
-        then:
-          - globals.set:
-              id: light_brightness_target_
-              value: "1.0"
-          - light.turn_off:
-              id: light_
-              transition_length: 0ms
-        else:
-          - if:
-              condition:
-                lambda: return 1.0f == id(light_).current_values.get_brightness();
-              then:
-                - globals.set:
-                    id: light_brightness_target_
-                    value: "0.0"
-              else:
-                - light.turn_on:
-                    id: light_
-                    transition_length: 0ms
-                    brightness: !lambda return id(light_).current_values.get_brightness();
-          
-spi: *m5stack_atoms3r_spi
-
-display:
-  - <<: *m5stack_atoms3r_display
-    id: display_
-    auto_clear_enabled: false
-    update_interval: never
-
-ethernet: *m5stack_atomic_poe_base_ethernet
-
 logger:
   level: LOGGER_LEVEL
 
@@ -140,6 +70,77 @@ web_server:
 debug:
   update_interval: 60s
 
+esphome:
+  <<: *m5stack_atoms3r_esphome
+  name: NAME
+
+esp32: *m5stack_atoms3r_esp32
+
+psram: *m5stack_atoms3r_psram
+
+i2c: *m5stack_atoms3r_i2c
+
+lp5562: *m5stack_atoms3r_lp5562
+
+output: *m5stack_atoms3r_output
+
+spi: *m5stack_atoms3r_spi
+
+ethernet: *m5stack_atomic_poe_base_ethernet
+
+globals:
+  - id: light_brightness_target_
+    type: float
+    initial_value: "1.0"
+    restore_value: yes
+
+light:
+  # a completed turn_on action to brightness 0 will turn the light off with brightness 1
+  <<: *m5stack_atoms3r_light
+  id: light_
+  restore_mode: RESTORE_DEFAULT_ON
+
+binary_sensor:
+  <<: *m5stack_atoms3r_binary_sensor
+  on_press:
+    - logger.log: on_press light.turn_on
+    - light.turn_on:
+        id: light_
+        brightness: !lambda return id(light_brightness_target_);
+        transition_length: !lambda |-
+          return static_cast<uint32_t>(2000.0f * (
+            std::abs(id(light_brightness_target_) - id(light_).remote_values.get_brightness())));
+  on_release:
+    - if:
+        condition:
+          lambda: return !id(light_).current_values.is_on();
+        then:
+          - logger.log: on_release light_brightness_target 0 → 1
+          - globals.set:
+              id: light_brightness_target_
+              value: "1.0"
+        else:
+          - if:
+              condition:
+                lambda: return 1.0f == id(light_).current_values.get_brightness();
+              then:
+                - logger.log: on_release light_brightness_target 1 → 0
+                - globals.set:
+                    id: light_brightness_target_
+                    value: "0.0"
+              else:
+                - logger.log: on_release light.turn_on
+                - light.turn_on:
+                    id: light_
+                    transition_length: 0ms
+                    brightness: !lambda return id(light_).current_values.get_brightness();
+          
+display:
+  - <<: *m5stack_atoms3r_display
+    id: display_
+    auto_clear_enabled: false
+    update_interval: never
+
 text_sensor:
   - platform: debug
     device:
@@ -154,10 +155,10 @@ switch:
 ifdef(`_smtp_defined', `
     on_turn_off:
       - smtp_.send:
-          subject: !lambda return str_sprintf("apms pressure (%:.2f PRESSURE_UNITS) < THRESHOLD", id(pressure_`'PRESSURE_UNITS`'_).state);
+          subject: !lambda return str_sprintf("apms pressure (%.2f PRESSURE_UNITS) < THRESHOLD", id(pressure_`'PRESSURE_UNITS`'_).state);
     on_turn_on:
       - smtp_.send:
-          subject: !lambda return str_sprintf("apms pressure (%:.2f PRESSURE_UNITS) >= THRESHOLD", id(pressure_`'PRESSURE_UNITS`'_).state);')
+          subject: !lambda return str_sprintf("apms pressure (%.2f PRESSURE_UNITS) >= THRESHOLD", id(pressure_`'PRESSURE_UNITS`'_).state);')
 
 sensor:
   - platform: debug
@@ -293,11 +294,11 @@ lvgl:
             widgets:
               - label:
                   id: pressure_label_
-                  text: "pressure"
+                  text: pressure
                   flex_grow: 1
                   width: 100%
               - label:
                   id: temperature_label_
-                  text: "temperature"
+                  text: temperature
                   flex_grow: 1
                   width: 100%

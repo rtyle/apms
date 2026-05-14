@@ -101,7 +101,6 @@ define(M5STACK_ATOM_BUS_1_04, GPIO8)dnl
   light: &namespace`'_light
     - platform: monochromatic
       output: namespace`'_output
-      restore_mode: RESTORE_DEFAULT_ON
 
   spi: &namespace`'_spi
     id: namespace`'_spi
@@ -119,6 +118,8 @@ define(M5STACK_ATOM_BUS_1_04, GPIO8)dnl
       dimensions:
         height: 128
         width: 128
+        offset_height: 1
+        offset_width: 2
       invert_colors: true
 
 undefine(`namespace')dnl
