@@ -31,7 +31,12 @@ define(NAMESPACE`'_DISPLAY_DC, GPIO42)dnl
 define(NAMESPACE`'_DISPLAY_RESET, GPIO48)dnl
 define(NAMESPACE`'_DISPLAY_CS, GPIO14)dnl
 dnl
-dnl define external GPIO pins on the AtomS3R's Atom-Bus
+dnl define external GPIO pins
+define(NAMESPACE`'_GROVE_0, GPIO1)dnl
+define(NAMESPACE`'_GROVE_1, GPIO2)dnl
+define(NAMESPACE`'_GROVE_3, 5V)dnl
+define(NAMESPACE`'_GROVE_4, GND)dnl
+dnl
 define(M5STACK_ATOM_BUS_0_00, GPIO39)dnl
 define(M5STACK_ATOM_BUS_0_01, GPIO38)dnl
 define(M5STACK_ATOM_BUS_0_02, 5V)dnl
@@ -76,13 +81,17 @@ define(M5STACK_ATOM_BUS_1_04, GPIO8)dnl
       internal: true
 
   i2c: &namespace`'_i2c
-    id: namespace`'_i2c
-    scl:
-      number: indir(NAMESPACE`'_I2C_SCL)
-      ignore_strapping_warning: true
-    sda:
-      number: indir(NAMESPACE`'_I2C_SDA)
-    scan: true
+    - id: namespace`'_i2c
+      scl:
+        number: indir(NAMESPACE`'_I2C_SCL)
+        ignore_strapping_warning: true
+      sda:
+        number: indir(NAMESPACE`'_I2C_SDA)
+      scan: true
+    - id: namespace`'_i2c_grove
+      scl: indir(NAMESPACE`'_GROVE_0)
+      sda: indir(NAMESPACE`'_GROVE_1)
+      scan: true
 
   lp5562: &namespace`'_lp5562
     id: namespace`'_lp5562
