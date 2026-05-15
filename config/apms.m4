@@ -203,6 +203,7 @@ sensor:
 
   - platform: tem3200
     id: tem3200_
+    i2c_id: m5stack_atoms3r_i2c_grove
     update_interval: 60s
 
     temperature:
