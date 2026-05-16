@@ -49,20 +49,20 @@ define(PRESSURE_MAXIMUM_bar, 7)dnl
 ifdef(`PRESSURE_MAXIMUM', `', `define(`PRESSURE_MAXIMUM', indir(PRESSURE_MAXIMUM_`'PRESSURE_UNITS))')dnl
 dnl
 dnl   -DTEMPERATURE_UNITS=units
-dnl     Value is units (°f or °c) of temperature label
-ifdef(`TEMPERATURE_UNITS', `', `define(`TEMPERATURE_UNITS', `°f')')dnl
-ifdef(`TEMPERATURE_UNITS', `define(`TEMPERATURE_UNITS', translit(TEMPERATURE_UNITS, `A-Z', `a-z'))', `define(`TEMPERATURE_UNITS', `°F')')dnl
+dnl     Value is units (f or c) of temperature label
+ifdef(`TEMPERATURE_UNITS', `', `define(`TEMPERATURE_UNITS', `f')')dnl
+ifdef(`TEMPERATURE_UNITS', `define(`TEMPERATURE_UNITS', translit(TEMPERATURE_UNITS, `A-Z', `a-z'))', `define(`TEMPERATURE_UNITS', `F')')dnl
 dnl
 dnl   -DTEMPERATURE_MINIMUM=value
 dnl     Minimum pressure value supported by temperature meter
-define(TEMPERATURE_MINIMUM_°f, 0)dnl
-define(TEMPERATURE_MINIMUM_°c, -20)dnl
+define(TEMPERATURE_MINIMUM_f, 0)dnl
+define(TEMPERATURE_MINIMUM_c, -20)dnl
 ifdef(`TEMPERATURE_MINIMUM', `', `define(`TEMPERATURE_MINIMUM', indir(TEMPERATURE_MINIMUM_`'TEMPERATURE_UNITS))')dnl
 dnl
 dnl   -DTEMPERATURE_MAXIMUM=value
 dnl     Maximum pressure value supported by temperature meter
-define(TEMPERATURE_MAXIMUM_°f, 120)dnl
-define(TEMPERATURE_MAXIMUM_°c, 50)dnl
+define(TEMPERATURE_MAXIMUM_f, 120)dnl
+define(TEMPERATURE_MAXIMUM_c, 50)dnl
 ifdef(`TEMPERATURE_MAXIMUM', `', `define(`TEMPERATURE_MAXIMUM', indir(TEMPERATURE_MAXIMUM_`'TEMPERATURE_UNITS))')dnl
 ---
 
@@ -259,7 +259,7 @@ sensor:
       id: temperature_celsius_
       on_value:
         - component.update: temperature_fahrenheit_`'dnl
-ifelse(TEMPERATURE_UNITS, `°c', `
+ifelse(TEMPERATURE_UNITS, `c', `
         - lvgl.label.update:
             id: temperature_label_
             text: !lambda return str_sprintf("PRESSURE_FORMAT", x);')
@@ -276,7 +276,7 @@ ifelse(TEMPERATURE_UNITS, `°c', `
       - calibrate_linear:
           - 0 -> 32
           - 100 -> 212`'dnl
-ifelse(TEMPERATURE_UNITS, `°f', `
+ifelse(TEMPERATURE_UNITS, `f', `
     on_value:
       - lvgl.label.update:
           id: temperature_label_
