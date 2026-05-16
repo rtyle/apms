@@ -25,18 +25,45 @@ dnl   -DSMTP=smtp
 dnl     Value is the name of the file that declares the smtp_ component
 ifdef(`SMTP', `', `define(`SMTP', `smtp.m4')')dnl
 dnl
-dnl   -DTEMPERATURE_UNITS=units
-dnl     Value is units (°F or °C) of temperature label
-ifdef(`TEMPERATURE_UNITS', `', `define(`TEMPERATURE_UNITS', `°F')')dnl
-ifdef(`TEMPERATURE_UNITS', `define(`TEMPERATURE_UNITS', translit(TEMPERATURE_UNITS, `a-z', `A-Z'))', `define(`TEMPERATURE_UNITS', `°F')')dnl
-dnl
 dnl   -DPRESSURE_UNITS=units
-dnl     Value is units (psi or mbar) of pressure label and THRESHOLD
+dnl     Value is units (psi or bar) of pressure label and PRESSURE_THRESHOLD
 ifdef(`PRESSURE_UNITS', `define(`PRESSURE_UNITS', translit(PRESSURE_UNITS, `A-Z', `a-z'))', `define(`PRESSURE_UNITS', `psi')')dnl
+define(PRESSURE_FORMAT, ifelse(PRESSURE_UNITS, psi, %.1f, %.4f))dnl
 dnl
-dnl   -DTHRESHOLD=threshold
-dnl     Pressure at or over threshold is alarming
-ifdef(`THRESHOLD', `', `define(`THRESHOLD', `80')')dnl
+dnl   -DPRESSURE_THRESHOLD=value
+dnl     Pressure at or over threshold value is alarming
+define(PRESSURE_THRESHOLD_psi, 80)dnl
+define(PRESSURE_THRESHOLD_bar, 5.5)dnl
+ifdef(`PRESSURE_THRESHOLD', `', `define(`PRESSURE_THRESHOLD', indir(PRESSURE_THRESHOLD_`'PRESSURE_UNITS))')dnl
+dnl
+dnl   -DPRESSURE_MINIMUM=value
+dnl     Minimum pressure value supported by pressure meter
+define(PRESSURE_MINIMUM_psi, 0)dnl
+define(PRESSURE_MINIMUM_bar, 0)dnl
+ifdef(`PRESSURE_MINIMUM', `', `define(`PRESSURE_MINIMUM', indir(PRESSURE_MINIMUM_`'PRESSURE_UNITS))')dnl
+dnl
+dnl   -DPRESSURE_MAXIMUM=value
+dnl     Maximum pressure value supported by pressure meter
+define(PRESSURE_MAXIMUM_psi, 100)dnl
+define(PRESSURE_MAXIMUM_bar, 7)dnl
+ifdef(`PRESSURE_MAXIMUM', `', `define(`PRESSURE_MAXIMUM', indir(PRESSURE_MAXIMUM_`'PRESSURE_UNITS))')dnl
+dnl
+dnl   -DTEMPERATURE_UNITS=units
+dnl     Value is units (°f or °c) of temperature label
+ifdef(`TEMPERATURE_UNITS', `', `define(`TEMPERATURE_UNITS', `°f')')dnl
+ifdef(`TEMPERATURE_UNITS', `define(`TEMPERATURE_UNITS', translit(TEMPERATURE_UNITS, `A-Z', `a-z'))', `define(`TEMPERATURE_UNITS', `°F')')dnl
+dnl
+dnl   -DTEMPERATURE_MINIMUM=value
+dnl     Minimum pressure value supported by temperature meter
+define(TEMPERATURE_MINIMUM_°f, 0)dnl
+define(TEMPERATURE_MINIMUM_°c, -20)dnl
+ifdef(`TEMPERATURE_MINIMUM', `', `define(`TEMPERATURE_MINIMUM', indir(TEMPERATURE_MINIMUM_`'TEMPERATURE_UNITS))')dnl
+dnl
+dnl   -DTEMPERATURE_MAXIMUM=value
+dnl     Maximum pressure value supported by temperature meter
+define(TEMPERATURE_MAXIMUM_°f, 120)dnl
+define(TEMPERATURE_MAXIMUM_°c, 50)dnl
+ifdef(`TEMPERATURE_MAXIMUM', `', `define(`TEMPERATURE_MAXIMUM', indir(TEMPERATURE_MAXIMUM_`'TEMPERATURE_UNITS))')dnl
 ---
 
 include(m5stack_atoms3r.m4)dnl
@@ -183,10 +210,10 @@ switch:
 ifdef(`_smtp_defined', `
     on_turn_off:
       - smtp_.send:
-          subject: !lambda return str_sprintf("apms pressure (%.2f PRESSURE_UNITS) < THRESHOLD", id(pressure_`'PRESSURE_UNITS`'_).state);
+          subject: !lambda return str_sprintf("apms pressure (PRESSURE_FORMAT PRESSURE_UNITS) < PRESSURE_THRESHOLD", id(pressure_`'PRESSURE_UNITS`'_).state);
     on_turn_on:
       - smtp_.send:
-          subject: !lambda return str_sprintf("apms pressure (%.2f PRESSURE_UNITS) >= THRESHOLD", id(pressure_`'PRESSURE_UNITS`'_).state);')
+          subject: !lambda return str_sprintf("apms pressure (PRESSURE_FORMAT PRESSURE_UNITS) >= PRESSURE_THRESHOLD", id(pressure_`'PRESSURE_UNITS`'_).state);')
 
 sensor:
   - platform: debug
@@ -206,36 +233,36 @@ sensor:
     i2c_id: m5stack_atoms3r_i2c_grove
     update_interval: 60s
 
-    temperature:
-      id: temperature_celsius_
-      on_value:
-        - component.update: temperature_fahrenheit_`'dnl
-ifelse(TEMPERATURE_UNITS, `°C', `
-        - lvgl.label.update:
-            id: temperature_label_
-            text: !lambda return str_sprintf("%.2f TEMPERATURE_UNITS", x);')
-
     raw_pressure:
       id: pressure_
       internal: true
       on_value:
         - component.update: pressure_psi_
-        - component.update: pressure_mbar_
+        - component.update: pressure_bar_
         - if:
             condition:
-              lambda: return id(pressure_`'PRESSURE_UNITS`'_).state < THRESHOLD;
+              lambda: return id(pressure_`'PRESSURE_UNITS`'_).state < PRESSURE_THRESHOLD;
             then:
               - logger.log:
                   level: INFO
-                  format: "NAME pressure (%.2f PRESSURE_UNITS) < THRESHOLD"
+                  format: "NAME pressure (PRESSURE_FORMAT PRESSURE_UNITS) < PRESSURE_THRESHOLD"
                   args: [id(pressure_`'PRESSURE_UNITS`'_).state]
               - switch.turn_off: pressure_alarm_
             else:
               - logger.log:
                   level: WARN
-                  format: "NAME pressure (%.2f PRESSURE_UNITS) >= THRESHOLD"
+                  format: "NAME pressure (PRESSURE_FORMAT PRESSURE_UNITS) >= PRESSURE_THRESHOLD"
                   args: [id(pressure_`'PRESSURE_UNITS`'_).state]
               - switch.turn_on: pressure_alarm_
+
+    temperature:
+      id: temperature_celsius_
+      on_value:
+        - component.update: temperature_fahrenheit_`'dnl
+ifelse(TEMPERATURE_UNITS, `°c', `
+        - lvgl.label.update:
+            id: temperature_label_
+            text: !lambda return str_sprintf("PRESSURE_FORMAT", x);')
 
   - platform: template
     id: temperature_fahrenheit_
@@ -249,11 +276,11 @@ ifelse(TEMPERATURE_UNITS, `°C', `
       - calibrate_linear:
           - 0 -> 32
           - 100 -> 212`'dnl
-ifelse(TEMPERATURE_UNITS, `°F', `
+ifelse(TEMPERATURE_UNITS, `°f', `
     on_value:
       - lvgl.label.update:
           id: temperature_label_
-          text: !lambda return str_sprintf("%.2f TEMPERATURE_UNITS", x);')
+          text: !lambda return str_sprintf("PRESSURE_FORMAT", x);')
 
   - platform: template
     id: pressure_psi_
@@ -276,12 +303,12 @@ ifelse(PRESSURE_UNITS, `psi', `
     on_value:
       - lvgl.label.update:
           id: pressure_label_
-          text: !lambda return str_sprintf("%.2f PRESSURE_UNITS", x);')
+          text: !lambda return str_sprintf("PRESSURE_FORMAT", x);')
 
   - platform: template
-    id: pressure_mbar_
+    id: pressure_bar_
     update_interval: never
-    unit_of_measurement: mbar
+    unit_of_measurement: bar
     state_class: measurement
     device_class: pressure
     lambda: |-
@@ -289,18 +316,28 @@ ifelse(PRESSURE_UNITS, `psi', `
     filters:
       - calibrate_linear:
           - 0 -> 0
-          - 1 -> 68.9476`'dnl
-ifelse(PRESSURE_UNITS, `mbar', `
+          - 1 -> 0.0689476`'dnl
+ifelse(PRESSURE_UNITS, `bar', `
     on_value:
       - lvgl.label.update:
           id: pressure_label_
-          text: !lambda return str_sprintf("%.2f PRESSURE_UNITS", x);')
+          text: !lambda return str_sprintf("PRESSURE_FORMAT", x);')
 
 image:
   - id: apms_
     file: apms.png
     type: rgb565
     resize: 128x128
+  - id: pressure_scale_
+    file: scale_`'PRESSURE_UNITS.png
+    type: rgb565
+    resize: 128x128
+    transparency: alpha_channel
+  - id: temperature_scale_
+    file: scale_`'TEMPERATURE_UNITS.png
+    type: rgb565
+    resize: 128x128
+    transparency: alpha_channel
 
 lvgl:
   pages:
@@ -308,26 +345,85 @@ lvgl:
       widgets:
         - image:
             src: apms_
+            align: CENTER
             on_boot:
               - delay: 4s
               - lvgl.page.next:
-    - id: widget_page_
+    - id: pressure_page_
       widgets:
-        - obj:
-            width: 100%
-            height: 100%
-            layout:
-              type: flex
-              flex_flow: column
-              pad_row: 0
+        - container:
             widgets:
+              - obj:
+                  bg_color: black
+                  width: 100%
+                  height: 100%
+                  border_width: 0
+                  radius: 0
+              - meter:
+                  bg_opa: TRANSP
+                  width: 100%
+                  height: 100%
+                  scales:
+                    - range_from: PRESSURE_MINIMUM
+                      range_to: PRESSURE_MAXIMUM
+                      indicators:
+                        - arc:
+                            color: green
+                            width: 8
+                            start_value: PRESSURE_MINIMUM
+                            end_value: PRESSURE_THRESHOLD
+                        - arc:
+                            color: red
+                            width: 8
+                            start_value: PRESSURE_THRESHOLD
+                            end_value: PRESSURE_MAXIMUM
+              - image:
+                  src: pressure_scale_
+                  align: CENTER
+              - meter:
+                  bg_opa: TRANSP
+                  width: 100%
+                  height: 100%
+                  scales:
+                    - range_from: PRESSURE_MINIMUM
+                      range_to: PRESSURE_MAXIMUM
+                      indicators:
+                        - line:
+                            color: red
+                            value: PRESSURE_THRESHOLD
               - label:
                   id: pressure_label_
-                  text: pressure
-                  flex_grow: 1
+                  align: CENTER
+                  text_color: white
+                  y: 45
+                  text: "HELLO"
+    - id: temperature_page_
+      widgets:
+        - container:
+            widgets:
+              - obj:
+                  bg_color: black
                   width: 100%
+                  height: 100%
+                  border_width: 0
+                  radius: 0
+              - image:
+                  src: temperature_scale_
+                  align: CENTER
+              - meter:
+                  bg_opa: TRANSP
+                  width: 100%
+                  height: 100%
+                  scales:
+                    - range_from: TEMPERATURE_MINIMUM
+                      range_to: TEMPERATURE_MAXIMUM
+                      indicators:
+                        - line:
+                            color: red
+                            value: eval((TEMPERATURE_MINIMUM + TEMPERATURE_MAXIMUM) / 2)
               - label:
                   id: temperature_label_
-                  text: temperature
-                  flex_grow: 1
-                  width: 100%
+                  align: CENTER
+                  text_color: white
+                  y: 45
+                  text: "HELLO"

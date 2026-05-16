@@ -87,6 +87,7 @@ define(M5STACK_ATOM_BUS_1_04, GPIO8)dnl
         ignore_strapping_warning: true
       sda:
         number: indir(NAMESPACE`'_I2C_SDA)
+        ignore_strapping_warning: true
       scan: true
     - id: namespace`'_i2c_grove
       scl: indir(NAMESPACE`'_GROVE_0)
