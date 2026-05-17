@@ -75,8 +75,9 @@ define(M5STACK_ATOM_DISPLAY_SIZE, M5STACK_ATOM_DISPLAY_WIDTH`'x`'M5STACK_ATOM_DI
     mode: octal
     speed: 80MHz
 
-  binary_sensor: &namespace`'_binary_sensor
-    - platform: gpio
+  binary_sensor:
+    - &namespace`'_binary_sensor
+      platform: gpio
       id: namespace`'_button
       pin:
         number: indir(NAMESPACE`'_BUTTON)
@@ -100,22 +101,25 @@ define(M5STACK_ATOM_DISPLAY_SIZE, M5STACK_ATOM_DISPLAY_WIDTH`'x`'M5STACK_ATOM_DI
       sda: indir(NAMESPACE`'_GROVE_1)
       scan: true
 
-  lp5562: &namespace`'_lp5562
-    id: namespace`'_lp5562
-    i2c_id: namespace`'_i2c
-    use_internal_clk: true
-    high_pwm_freq: true
-    logarithmic_dimming: true
-    white_current: 17.5
+  lp5562:
+    - &namespace`'_lp5562
+      id: namespace`'_lp5562
+      i2c_id: namespace`'_i2c
+      use_internal_clk: true
+      high_pwm_freq: true
+      logarithmic_dimming: true
+      white_current: 17.5
 
-  output: &namespace`'_output
-    - platform: lp5562
+  output:
+    - &namespace`'_output
+      platform: lp5562
       id: namespace`'_output
       lp5562_id: namespace`'_lp5562
       channel: white
 
-  light: &namespace`'_light
-    - platform: monochromatic
+  light:
+    - &namespace`'_light
+      platform: monochromatic
       output: namespace`'_output
 
   spi: &namespace`'_spi
@@ -124,8 +128,9 @@ define(M5STACK_ATOM_DISPLAY_SIZE, M5STACK_ATOM_DISPLAY_WIDTH`'x`'M5STACK_ATOM_DI
     clk_pin: indir(NAMESPACE`'_SPI_CLK)
     mosi_pin: indir(NAMESPACE`'_SPI_MOSI)
 
-  display: &namespace`'_display
-    - platform: mipi_spi
+  display:
+    - &namespace`'_display
+      platform: mipi_spi
       model: ST7789V
       dc_pin: indir(NAMESPACE`'_DISPLAY_DC)
       reset_pin: indir(NAMESPACE`'_DISPLAY_RESET)
