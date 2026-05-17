@@ -426,4 +426,4 @@ lvgl:
                   align: CENTER
                   text_color: white
                   y: 45
-                  text: "HELLO"
+                  text: "-----"
