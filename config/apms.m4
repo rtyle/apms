@@ -107,7 +107,14 @@ psram: *m5stack_atoms3r_psram
 
 i2c:
   - *m5stack_atoms3r_i2c
-  - *m5stack_atoms3r_i2c_grove
+  - id: i2c_
+    scl_pullup_enabled: true
+    scl:
+      number: M5STACK_ATOMS3R_GROVE_0
+    sda_pullup_enabled: true
+    sda:
+      number: M5STACK_ATOMS3R_GROVE_1
+    scan: true
 
 lp5562:
   <<: *m5stack_atoms3r_lp5562
@@ -234,7 +241,7 @@ sensor:
 
   - platform: tem3200
     id: tem3200_
-    i2c_id: m5stack_atoms3r_i2c_grove
+    i2c_id: i2c_
     update_interval: 60s
 
     raw_pressure:
