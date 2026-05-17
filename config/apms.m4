@@ -107,14 +107,10 @@ psram: *m5stack_atoms3r_psram
 
 i2c:
   - *m5stack_atoms3r_i2c
-  - id: i2c_grove_
-    scl_pullup_enabled: false # add stronger external 4.7k pullup per datasheet
-    scl:
-      number: M5STACK_ATOMS3R_GROVE_0
-    sda_pullup_enabled: false # add stronger external 4.7k pullup per datasheet
-    sda:
-      number: M5STACK_ATOMS3R_GROVE_1
-    scan: true
+  - <<: *m5stack_atoms3r_i2c_grove
+    # replace internal pullups with external 4.7k pullups per datasheet
+    scl_pullup_enabled: false
+    sda_pullup_enabled: false
 
 lp5562:
   <<: *m5stack_atoms3r_lp5562
@@ -241,7 +237,7 @@ sensor:
 
   - platform: tem3200
     id: tem3200_
-    i2c_id: i2c_grove_
+    i2c_id: m5stack_atoms3r_i2c_grove
     update_interval: 60s
 
     raw_pressure:
