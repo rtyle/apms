@@ -105,7 +105,9 @@ esp32: *m5stack_atoms3r_esp32
 
 psram: *m5stack_atoms3r_psram
 
-i2c: *m5stack_atoms3r_i2c
+i2c:
+  - *m5stack_atoms3r_i2c
+  - *m5stack_atoms3r_i2c_grove
 
 lp5562: *m5stack_atoms3r_lp5562
 
@@ -257,6 +259,7 @@ sensor:
 
     temperature:
       id: temperature_celsius_
+      name: temperature celsius
       on_value:
         - component.update: temperature_fahrenheit_`'dnl
 ifelse(TEMPERATURE_UNITS, `c', `
@@ -266,6 +269,7 @@ ifelse(TEMPERATURE_UNITS, `c', `
 
   - platform: template
     id: temperature_fahrenheit_
+    name: temperature fahrenheit
     update_interval: never
     unit_of_measurement: °F
     state_class: measurement
@@ -284,6 +288,7 @@ ifelse(TEMPERATURE_UNITS, `f', `
 
   - platform: template
     id: pressure_psi_
+    name: pressure psi
     update_interval: never
     unit_of_measurement: PSI
     state_class: measurement
@@ -307,6 +312,7 @@ ifelse(PRESSURE_UNITS, `psi', `
 
   - platform: template
     id: pressure_bar_
+    name: pressure bar
     update_interval: never
     unit_of_measurement: bar
     state_class: measurement

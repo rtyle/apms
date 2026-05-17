@@ -84,8 +84,9 @@ define(M5STACK_ATOM_DISPLAY_SIZE, M5STACK_ATOM_DISPLAY_WIDTH`'x`'M5STACK_ATOM_DI
         inverted: true
       internal: true
 
-  i2c: &namespace`'_i2c
-    - id: namespace`'_i2c
+  i2c:
+    - &namespace`'_i2c
+      id: namespace`'_i2c
       scl:
         number: indir(NAMESPACE`'_I2C_SCL)
         ignore_strapping_warning: true
@@ -93,7 +94,8 @@ define(M5STACK_ATOM_DISPLAY_SIZE, M5STACK_ATOM_DISPLAY_WIDTH`'x`'M5STACK_ATOM_DI
         number: indir(NAMESPACE`'_I2C_SDA)
         ignore_strapping_warning: true
       scan: true
-    - id: namespace`'_i2c_grove
+    - &namespace`'_i2c_grove
+      id: namespace`'_i2c_grove
       scl: indir(NAMESPACE`'_GROVE_0)
       sda: indir(NAMESPACE`'_GROVE_1)
       scan: true
