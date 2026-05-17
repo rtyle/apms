@@ -396,7 +396,7 @@ lvgl:
                   align: CENTER
                   text_color: white
                   y: 45
-                  text: "HELLO"
+                  text: "---"
     - id: temperature_page_
       widgets:
         - container:
@@ -426,4 +426,4 @@ lvgl:
                   align: CENTER
                   text_color: white
                   y: 45
-                  text: "-----"
+                  text: "--"
