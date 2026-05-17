@@ -108,10 +108,10 @@ psram: *m5stack_atoms3r_psram
 i2c:
   - *m5stack_atoms3r_i2c
   - id: i2c_grove_
-    scl_pullup_enabled: true
+    scl_pullup_enabled: false # add stronger external 4.7k pullup per datasheet
     scl:
       number: M5STACK_ATOMS3R_GROVE_0
-    sda_pullup_enabled: true
+    sda_pullup_enabled: false # add stronger external 4.7k pullup per datasheet
     sda:
       number: M5STACK_ATOMS3R_GROVE_1
     scan: true
