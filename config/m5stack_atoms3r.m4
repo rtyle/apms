@@ -47,6 +47,10 @@ define(M5STACK_ATOM_BUS_1_01, GPIO5)dnl
 define(M5STACK_ATOM_BUS_1_02, GPIO6)dnl
 define(M5STACK_ATOM_BUS_1_03, GPIO7)dnl
 define(M5STACK_ATOM_BUS_1_04, GPIO8)dnl
+dnl
+define(M5STACK_ATOM_DISPLAY_WIDTH, 128)dnl
+define(M5STACK_ATOM_DISPLAY_HEIGHT, 128)dnl
+define(M5STACK_ATOM_DISPLAY_SIZE, M5STACK_ATOM_DISPLAY_WIDTH`'x`'M5STACK_ATOM_DISPLAY_HEIGHT)dnl
 .namespace:
 
   external_components: &namespace`'_external_components
@@ -126,8 +130,8 @@ define(M5STACK_ATOM_BUS_1_04, GPIO8)dnl
       cs_pin: indir(NAMESPACE`'_DISPLAY_CS)
       data_rate: 40MHz
       dimensions:
-        height: 128
-        width: 128
+        width: M5STACK_ATOM_DISPLAY_WIDTH
+        height: M5STACK_ATOM_DISPLAY_HEIGHT
         offset_height: 1
         offset_width: 2
       invert_colors: true

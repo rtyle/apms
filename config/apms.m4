@@ -327,16 +327,16 @@ image:
   - id: apms_
     file: apms.png
     type: rgb565
-    resize: 128x128
+    resize: M5STACK_ATOM_DISPLAY_SIZE
   - id: pressure_scale_
     file: scale_`'PRESSURE_UNITS.png
     type: rgb565
-    resize: 128x128
+    resize: M5STACK_ATOM_DISPLAY_SIZE
     transparency: alpha_channel
   - id: temperature_scale_
     file: scale_`'TEMPERATURE_UNITS.png
     type: rgb565
-    resize: 128x128
+    resize: M5STACK_ATOM_DISPLAY_SIZE
     transparency: alpha_channel
 
 lvgl:
