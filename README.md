@@ -51,17 +51,27 @@ PoE power must be provided through a capable switch port or PoE injector.
 AtomS3R has a standard [Grove](https://wiki.seeedstudio.com/Grove_System/) connector (HY2.0-4P)
 for supporting an external I²C pressure transducer
 that can be threaded (by way of an air chuck) into a Schrader valve.
+External I²C pullup resistors are required.
+See TE M3200 datasheet: "In most cases, 4.7kΩ is a reasonable choice."
+These can be soldered inline or applied to a grove to grove connector.
+For bench testing, a grove to 4-pin extension connetor and a breadboard are convenient.
 
 * [M5Stack Grove Cable (A034-B)](https://docs.m5stack.com/en/accessory/cable/grove_cable)
     [Digikey](https://www.digikey.com/en/products/detail/m5stack-technology-co-ltd/A034-B/16370068)
     [Mouser](https://www.mouser.com/ProductDetail/M5Stack/A034-B?qs=81r%252BiQLm7BT61XjWHYVAMA%3D%3D)
+* [M5Stack Grove to Grove extension connector (A040)](https://docs.m5stack.com/en/accessory/converter/grove2grove)
+    [Digikey](https://www.digikey.com/en/products/detail/m5stack-technology-co-ltd/A040/16370069)
+    [Mouser](https://www.mouser.com/ProductDetail/170-A040)
+* [M5Stack Grove to 4P extension connector (A099)](https://docs.m5stack.com/en/accessory/converter/grove_to_4p)
+    [Digikey](https://www.digikey.com/en/products/detail/m5stack-technology-co-ltd/A099/14318608)
+    [Mouser](https://www.mouser.com/ProductDetail/170-A099)
 * [TE M3200 Pressure Transducer (M32JM-000105-100PG)](https://www.te.com/en/product-20006465-00.html)
     [Digikey](https://www.digikey.com/en/products/detail/te-connectivity-measurement-specialties/M32JM-000105-100PG/9695477)
     [Mouser](https://www.mouser.com/ProductDetail/TE-Connectivity-Measurement-Specialties/M32JM-000105-100PG?qs=lc2O%252BfHJPVYobfuHIj4Lyg%3D%3D)
 * [Godeson Air Chuck (A38)](https://www.nbgodeson.com/en/productshow-1771.html)
     [Amazon](https://www.amazon.com/dp/B07JMNGBRG)
   
-Optionally, by using a T-valve adapter off the tank's Schrader valve we can both monitor and maintain its pressure.
+Optionally, by using a T-valve adapter off the tank's Schrader valve, pressure can be monitored and maintained.
 
 * [HawksHead T-Valve Adapter for TMPS Tires (TV1A)](https://www.hawksheadsystems.com/t%20valve%20adapters.html)
     [tpms.ca](https://tpms.ca/products/t-valve-adapters)
