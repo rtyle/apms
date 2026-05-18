@@ -176,26 +176,26 @@ binary_sensor:
                     value: "0.0f"
           - lvgl.page.next:
         else:
-          - if:
-              condition:
-                light.is_off: light_
-              then:
-                globals.set:
-                  id: light_brightness_target_
-                  value: "1.0f"
-              else:
-                - if:
-                    condition:
-                      lambda: return 1.0f == id(light_).current_values.get_brightness();
-                    then:
-                      globals.set:
-                        id: light_brightness_target_
-                        value: "0.0f"
-                    else:
-                      light.turn_on:
-                        id: light_
-                        transition_length: 0ms
-                        brightness: !lambda return id(light_).current_values.get_brightness();
+          if:
+            condition:
+              light.is_off: light_
+            then:
+              globals.set:
+                id: light_brightness_target_
+                value: "1.0f"
+            else:
+              if:
+                condition:
+                  lambda: return 1.0f == id(light_).current_values.get_brightness();
+                then:
+                  globals.set:
+                    id: light_brightness_target_
+                    value: "0.0f"
+                else:
+                  light.turn_on:
+                    id: light_
+                    transition_length: 0ms
+                    brightness: !lambda return id(light_).current_values.get_brightness();
 
 display:
   - <<: *m5stack_atoms3r_display
@@ -217,11 +217,11 @@ switch:
     optimistic: true`'dnl
 ifdef(`_smtp_defined', `
     on_turn_off:
-      - smtp_.send:
-          subject: !lambda return str_sprintf("apms pressure measurement success (now PRESSURE_FORMAT PRESSURE_UNIT)", id(pressure_`'PRESSURE_UNIT`'_).state);
+     smtp_.send:
+        subject: !lambda return str_sprintf("apms pressure measurement success (now PRESSURE_FORMAT PRESSURE_UNIT)", id(pressure_`'PRESSURE_UNIT`'_).state);
     on_turn_on:
-      - smtp_.send:
-          subject: !lambda return str_sprintf("apms pressure measurement failure (was PRESSURE_FORMAT PRESSURE_UNIT)", id(pressure_`'PRESSURE_UNIT`'_).state);')
+     smtp_.send:
+        subject: !lambda return str_sprintf("apms pressure measurement failure (was PRESSURE_FORMAT PRESSURE_UNIT)", id(pressure_`'PRESSURE_UNIT`'_).state);')
 
   - platform: template
     id: pressure_threshold_alarm_
@@ -229,11 +229,11 @@ ifdef(`_smtp_defined', `
     optimistic: true`'dnl
 ifdef(`_smtp_defined', `
     on_turn_off:
-      - smtp_.send:
-          subject: !lambda return str_sprintf("apms pressure (PRESSURE_FORMAT PRESSURE_UNIT) < PRESSURE_THRESHOLD", id(pressure_`'PRESSURE_UNIT`'_).state);
+      smtp_.send:
+        subject: !lambda return str_sprintf("apms pressure (PRESSURE_FORMAT PRESSURE_UNIT) < PRESSURE_THRESHOLD", id(pressure_`'PRESSURE_UNIT`'_).state);
     on_turn_on:
-      - smtp_.send:
-          subject: !lambda return str_sprintf("apms pressure (PRESSURE_FORMAT PRESSURE_UNIT) >= PRESSURE_THRESHOLD", id(pressure_`'PRESSURE_UNIT`'_).state);')
+      smtp_.send:
+        subject: !lambda return str_sprintf("apms pressure (PRESSURE_FORMAT PRESSURE_UNIT) >= PRESSURE_THRESHOLD", id(pressure_`'PRESSURE_UNIT`'_).state);')
 
   - platform: template
     id: temperature_measurement_alarm_
@@ -323,9 +323,9 @@ sensor:
           - 100 -> 212`'dnl
 ifelse(TEMPERATURE_UNIT, `f', `
     on_value:
-      - lvgl.label.update:
-          id: temperature_label_
-          text: !lambda return str_sprintf("PRESSURE_FORMAT", x);')
+      lvgl.label.update:
+        id: temperature_label_
+        text: !lambda return str_sprintf("PRESSURE_FORMAT", x);')
 
   - platform: template
     id: pressure_psi_
@@ -347,9 +347,9 @@ ifelse(TEMPERATURE_UNIT, `f', `
           - 15000 -> 100`'dnl
 ifelse(PRESSURE_UNIT, `psi', `
     on_value:
-      - lvgl.label.update:
-          id: pressure_label_
-          text: !lambda return str_sprintf("PRESSURE_FORMAT", x);')
+      lvgl.label.update:
+        id: pressure_label_
+        text: !lambda return str_sprintf("PRESSURE_FORMAT", x);')
 
   - platform: template
     id: pressure_bar_
@@ -366,9 +366,9 @@ ifelse(PRESSURE_UNIT, `psi', `
           - 1 -> 0.0689476`'dnl
 ifelse(PRESSURE_UNIT, `bar', `
     on_value:
-      - lvgl.label.update:
-          id: pressure_label_
-          text: !lambda return str_sprintf("PRESSURE_FORMAT", x);')
+      lvgl.label.update:
+        id: pressure_label_
+        text: !lambda return str_sprintf("PRESSURE_FORMAT", x);')
 
 image:
   - id: apms_
