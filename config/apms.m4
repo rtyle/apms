@@ -108,7 +108,7 @@ psram: *m5stack_atoms3r_psram
 i2c:
   - *m5stack_atoms3r_i2c
   - <<: *m5stack_atoms3r_i2c_grove
-    # replace internal pullups with external 4.7k pullups per datasheet
+    # replace internal pullups with external 4.7k pullups per TE M3200 datasheet
     scl_pullup_enabled: false
     sda_pullup_enabled: false
 
