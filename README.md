@@ -69,7 +69,7 @@ Optionally, by using a T-valve adapter off the tank's Schrader valve we can both
 For bench testing, a capped tank valve can substitute for the expansion tank.
 
 * Godeson ¼″ NPT tank valve [Amazon](https://www.amazon.com/dp/B0CPPBSFV5)
-* uxcell ¼″ NPT cap [Amazon](https://www.amazon.com/dp/B0DLKNM5CG)
+* [uxcell ¼″ NPT cap (f24032100ux0225)](https://www.harfington.com/products/p-1684955?variant=46634064511225) [Amazon](https://www.amazon.com/dp/B0DLKNM5CG)
 
 ### Software
 
