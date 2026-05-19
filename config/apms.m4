@@ -93,9 +93,25 @@ web_server:
 debug:
   update_interval: 60s
 
+globals:
+  - id: after_boot_
+    type: bool
+    initial_value: "false"
+  - id: button_held_
+    type: bool
+    initial_value: "false"
+  - id: light_brightness_target_
+    type: float
+    initial_value: "1.0f"
+    restore_value: yes
+
 esphome:
   <<: *m5stack_atoms3r_esphome
   name: NAME
+  on_boot:
+    globals.set:
+      id: after_boot_
+      value: "true"
 
 esp32: *m5stack_atoms3r_esp32
 
@@ -117,15 +133,6 @@ output:
 spi: *m5stack_atoms3r_spi
 
 ethernet: *m5stack_atomic_poe_base_ethernet
-
-globals:
-  - id: button_held_
-    type: bool
-    initial_value: "false"
-  - id: light_brightness_target_
-    type: float
-    initial_value: "1.0f"
-    restore_value: yes
 
 light:
   # a completed turn_on action to brightness 0 will turn the light off but with brightness 1
@@ -214,11 +221,19 @@ switch:
     optimistic: true`'dnl
 ifdef(`_smtp_defined', `
     on_turn_off:
-     smtp_.send:
-        subject: !lambda return str_sprintf("apms pressure measurement success (now PRESSURE_FORMAT PRESSURE_UNIT)", id(pressure_`'PRESSURE_UNIT`'_).state);
+      if:
+        condition:
+          lambda: return id(after_boot_);
+        then:
+          smtp_.send:
+            subject: !lambda return str_sprintf("apms pressure measurement success (now PRESSURE_FORMAT PRESSURE_UNIT)", id(pressure_`'PRESSURE_UNIT`'_).state);
     on_turn_on:
-     smtp_.send:
-        subject: !lambda return str_sprintf("apms pressure measurement failure (was PRESSURE_FORMAT PRESSURE_UNIT)", id(pressure_`'PRESSURE_UNIT`'_).state);')
+      if:
+        condition:
+          lambda: return id(after_boot_);
+        then:
+          smtp_.send:
+            subject: !lambda return str_sprintf("apms pressure measurement failure (was PRESSURE_FORMAT PRESSURE_UNIT)", id(pressure_`'PRESSURE_UNIT`'_).state);')
 
   - platform: template
     id: pressure_threshold_alarm_
@@ -227,11 +242,19 @@ ifdef(`_smtp_defined', `
     optimistic: true`'dnl
 ifdef(`_smtp_defined', `
     on_turn_off:
-      smtp_.send:
-        subject: !lambda return str_sprintf("apms pressure (PRESSURE_FORMAT PRESSURE_UNIT) < PRESSURE_THRESHOLD", id(pressure_`'PRESSURE_UNIT`'_).state);
+      if:
+        condition:
+          lambda: return id(after_boot_);
+        then:
+          smtp_.send:
+            subject: !lambda return str_sprintf("apms pressure (PRESSURE_FORMAT PRESSURE_UNIT) < PRESSURE_THRESHOLD", id(pressure_`'PRESSURE_UNIT`'_).state);
     on_turn_on:
-      smtp_.send:
-        subject: !lambda return str_sprintf("apms pressure (PRESSURE_FORMAT PRESSURE_UNIT) >= PRESSURE_THRESHOLD", id(pressure_`'PRESSURE_UNIT`'_).state);')
+      if:
+        condition:
+          lambda: return id(after_boot_);
+        then:
+          smtp_.send:
+            subject: !lambda return str_sprintf("apms pressure (PRESSURE_FORMAT PRESSURE_UNIT) >= PRESSURE_THRESHOLD", id(pressure_`'PRESSURE_UNIT`'_).state);')
 
   - platform: template
     id: temperature_measurement_alarm_
