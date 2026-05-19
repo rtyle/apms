@@ -12,8 +12,8 @@ Geometry:
   All ticks lie at y=CY before rotation about (CX, CY)
 
 Usage:
-    python meter_bg.py --units psi
-    python meter_bg.py --units bar
+    python meter_bg.py --unit psi
+    python meter_bg.py --unit mbar
 """
 
 import argparse
@@ -29,7 +29,7 @@ MINOR_LEN = 48
 
 UNIT_DEFS = {
     "psi": dict(vmin=0, vmax=100, major_step=20, minor_div=4, label="PSI"),
-    "bar": dict(vmin=0, vmax=7, major_step=1, minor_div=5, label="BAR"),
+    "mbar": dict(vmin=0, vmax=7, major_step=1, minor_div=5, label="BAR"),
     "f": dict(vmin=0, vmax=120, major_step=20, minor_div=4, label="°F"),
     "c": dict(vmin=-20, vmax=50, major_step=10, minor_div=5, label="°C"),
 }
@@ -50,10 +50,10 @@ def label_pos(v, vmin, vmax):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--units", choices=["psi", "bar", "f", "c"], required=True)
+    parser.add_argument("--unit", choices=["psi", "mbar", "f", "c"], required=True)
     args = parser.parse_args()
 
-    cfg = UNIT_DEFS[args.units]
+    cfg = UNIT_DEFS[args.unit]
     vmin = cfg["vmin"]
     vmax = cfg["vmax"]
     major = cfg["major_step"]

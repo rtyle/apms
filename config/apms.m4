@@ -26,12 +26,12 @@ dnl     Value is the name of the file that declares the smtp_ component
 ifdef(`SMTP', `', `define(`SMTP', `smtp.m4')')dnl
 dnl
 dnl   -DPRESSURE_UNIT=value
-dnl     Unit value (psi or bar) for pressure
+dnl     Unit value (psi or mbar) for pressure
 ifdef(`PRESSURE_UNIT', `define(`PRESSURE_UNIT', translit(PRESSURE_UNIT, `A-Z', `a-z'))', `define(`PRESSURE_UNIT', `psi')')dnl
 dnl
 dnl   -DPRESSURE_FORMAT=value
 dnl     Format for pressure presentation
-ifdef(`PRESSURE_FORMAT', `', `define(`PRESSURE_FORMAT', ifelse(PRESSURE_UNIT, `psi', %.1f, %.4f))')dnl
+ifdef(`PRESSURE_FORMAT', `', `define(`PRESSURE_FORMAT', ifelse(PRESSURE_UNIT, `psi', %.1f, %.0f))')dnl
 dnl
 dnl   -DPRESSURE_MINIMUM=value
 dnl     Minimum pressure value supported by meter
@@ -39,11 +39,11 @@ ifdef(`PRESSURE_MINIMUM', `', `define(`PRESSURE_MINIMUM', ifelse(PRESSURE_UNIT, 
 dnl
 dnl   -DPRESSURE_MAXIMUM=value
 dnl     Maximum pressure value supported by meter
-ifdef(`PRESSURE_MAXIMUM', `', `define(`PRESSURE_MAXIMUM', ifelse(PRESSURE_UNIT, `psi', 100, 7))')dnl
+ifdef(`PRESSURE_MAXIMUM', `', `define(`PRESSURE_MAXIMUM', ifelse(PRESSURE_UNIT, `psi', 100, 7000))')dnl
 dnl
 dnl   -DPRESSURE_THRESHOLD=value
 dnl     Pressure at or over threshold value is alarming
-ifdef(`PRESSURE_THRESHOLD', `', `define(`PRESSURE_THRESHOLD', ifelse(PRESSURE_UNIT, `psi', 80, 5.5))')dnl
+ifdef(`PRESSURE_THRESHOLD', `', `define(`PRESSURE_THRESHOLD', ifelse(PRESSURE_UNIT, `psi', 80, 5500))')dnl
 dnl
 dnl   -DTEMPERATURE_UNITS=units
 dnl     Unit value (f or c) for temperature
@@ -209,6 +209,7 @@ text_sensor:
 switch:
   - platform: template
     id: pressure_measurement_alarm_
+    name: pressure measurement alarm
     restore_mode: RESTORE_DEFAULT_OFF
     optimistic: true`'dnl
 ifdef(`_smtp_defined', `
@@ -221,6 +222,7 @@ ifdef(`_smtp_defined', `
 
   - platform: template
     id: pressure_threshold_alarm_
+    name: pressure threshold alarm
     restore_mode: RESTORE_DEFAULT_OFF
     optimistic: true`'dnl
 ifdef(`_smtp_defined', `
@@ -266,7 +268,7 @@ sensor:
             - lvgl.widget.hide: pressure_meter_
           else:
             - component.update: pressure_psi_
-            - component.update: pressure_bar_
+            - component.update: pressure_mbar_
             - switch.turn_off: pressure_measurement_alarm_
             - lvgl.widget.show: pressure_meter_
             - if:
@@ -300,6 +302,9 @@ sensor:
             - switch.turn_off: temperature_measurement_alarm_
             - lvgl.widget.show: temperature_meter_`'dnl
   ifelse(TEMPERATURE_UNIT, `c', `
+            - lvgl.indicator.update:
+                id: temperature_indicator_
+                value: !lambda return x;
             - lvgl.label.update:
                 id: temperature_label_
                 text: !lambda return str_sprintf("TEMPERATURE_FORMAT", x);')
@@ -319,9 +324,12 @@ sensor:
           - 100 -> 212`'dnl
 ifelse(TEMPERATURE_UNIT, `f', `
     on_value:
-      lvgl.label.update:
-        id: temperature_label_
-        text: !lambda return str_sprintf("TEMPERATURE_FORMAT", x);')
+      - lvgl.indicator.update:
+          id: temperature_indicator_
+          value: !lambda return x;
+      - lvgl.label.update:
+          id: temperature_label_
+          text: !lambda return str_sprintf("TEMPERATURE_FORMAT", x);')
 
   - platform: template
     id: pressure_psi_
@@ -343,15 +351,18 @@ ifelse(TEMPERATURE_UNIT, `f', `
           - 15000 -> 100`'dnl
 ifelse(PRESSURE_UNIT, `psi', `
     on_value:
-      lvgl.label.update:
-        id: pressure_label_
-        text: !lambda return str_sprintf("PRESSURE_FORMAT", x);')
+      - lvgl.indicator.update:
+          id: pressure_indicator_
+          value: !lambda return x;
+      - lvgl.label.update:
+          id: pressure_label_
+          text: !lambda return str_sprintf("PRESSURE_FORMAT", x);')
 
   - platform: template
-    id: pressure_bar_
-    name: pressure bar
+    id: pressure_mbar_
+    name: pressure mbar
     update_interval: never
-    unit_of_measurement: bar
+    unit_of_measurement: mbar
     state_class: measurement
     device_class: pressure
     lambda: |-
@@ -359,12 +370,15 @@ ifelse(PRESSURE_UNIT, `psi', `
     filters:
       - calibrate_linear:
           - 0 -> 0
-          - 1 -> 0.0689476`'dnl
-ifelse(PRESSURE_UNIT, `bar', `
+          - 1 -> 68.9476`'dnl
+ifelse(PRESSURE_UNIT, `mbar', `
     on_value:
-      lvgl.label.update:
-        id: pressure_label_
-        text: !lambda return str_sprintf("PRESSURE_FORMAT", x);')
+      - lvgl.indicator.update:
+          id: pressure_indicator_
+          value: !lambda return x;
+      - lvgl.label.update:
+          id: pressure_label_
+          text: !lambda return str_sprintf("PRESSURE_FORMAT", x);')
 
 image:
   - id: apms_
@@ -432,6 +446,7 @@ lvgl:
                       range_to: PRESSURE_MAXIMUM
                       indicators:
                         - line:
+                            id: pressure_indicator_
                             color: red
                             value: PRESSURE_THRESHOLD
               - label:
@@ -463,6 +478,7 @@ lvgl:
                       range_to: TEMPERATURE_MAXIMUM
                       indicators:
                         - line:
+                            id: temperature_indicator_
                             color: red
                             value: eval((TEMPERATURE_MINIMUM + TEMPERATURE_MAXIMUM) / 2)
               - label:
