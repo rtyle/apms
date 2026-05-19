@@ -28,42 +28,38 @@ dnl
 dnl   -DPRESSURE_UNIT=value
 dnl     Unit value (psi or bar) for pressure
 ifdef(`PRESSURE_UNIT', `define(`PRESSURE_UNIT', translit(PRESSURE_UNIT, `A-Z', `a-z'))', `define(`PRESSURE_UNIT', `psi')')dnl
-define(PRESSURE_FORMAT, ifelse(PRESSURE_UNIT, psi, %.1f, %.4f))dnl
 dnl
-dnl   -DPRESSURE_THRESHOLD=value
-dnl     Pressure at or over threshold value is alarming
-define(PRESSURE_THRESHOLD_psi, 80)dnl
-define(PRESSURE_THRESHOLD_bar, 5.5)dnl
-ifdef(`PRESSURE_THRESHOLD', `', `define(`PRESSURE_THRESHOLD', indir(PRESSURE_THRESHOLD_`'PRESSURE_UNIT))')dnl
+dnl   -DPRESSURE_FORMAT=value
+dnl     Format for pressure presentation
+ifdef(`PRESSURE_FORMAT', `', `define(`PRESSURE_FORMAT', ifelse(PRESSURE_UNIT, `psi', %.1f, %.4f))')dnl
 dnl
 dnl   -DPRESSURE_MINIMUM=value
 dnl     Minimum pressure value supported by meter
-define(PRESSURE_MINIMUM_psi, 0)dnl
-define(PRESSURE_MINIMUM_bar, 0)dnl
-ifdef(`PRESSURE_MINIMUM', `', `define(`PRESSURE_MINIMUM', indir(PRESSURE_MINIMUM_`'PRESSURE_UNIT))')dnl
+ifdef(`PRESSURE_MINIMUM', `', `define(`PRESSURE_MINIMUM', ifelse(PRESSURE_UNIT, `psi', 0, 0))')dnl
 dnl
 dnl   -DPRESSURE_MAXIMUM=value
 dnl     Maximum pressure value supported by meter
-define(PRESSURE_MAXIMUM_psi, 100)dnl
-define(PRESSURE_MAXIMUM_bar, 7)dnl
-ifdef(`PRESSURE_MAXIMUM', `', `define(`PRESSURE_MAXIMUM', indir(PRESSURE_MAXIMUM_`'PRESSURE_UNIT))')dnl
+ifdef(`PRESSURE_MAXIMUM', `', `define(`PRESSURE_MAXIMUM', ifelse(PRESSURE_UNIT, `psi', 100, 7))')dnl
+dnl
+dnl   -DPRESSURE_THRESHOLD=value
+dnl     Pressure at or over threshold value is alarming
+ifdef(`PRESSURE_THRESHOLD', `', `define(`PRESSURE_THRESHOLD', ifelse(PRESSURE_UNIT, `psi', 80, 5.5))')dnl
 dnl
 dnl   -DTEMPERATURE_UNITS=units
 dnl     Unit value (f or c) for temperature
-ifdef(`TEMPERATURE_UNIT', `', `define(`TEMPERATURE_UNIT', `f')')dnl
-ifdef(`TEMPERATURE_UNIT', `define(`TEMPERATURE_UNIT', translit(TEMPERATURE_UNIT, `A-Z', `a-z'))', `define(`TEMPERATURE_UNIT', `F')')dnl
+ifdef(`TEMPERATURE_UNIT', `define(`TEMPERATURE_UNIT', translit(TEMPERATURE_UNIT, `A-Z', `a-z'))', `define(`TEMPERATURE_UNIT', `f')')dnl
+dnl
+dnl   -DTEMPERATURE_FORMAT=value
+dnl     Format for temperature presentation
+ifdef(`TEMPERATURE_FORMAT', `', `define(`TEMPERATURE_FORMAT', ifelse(TEMPERATURE_UNIT, `f', %.1f, %.2f))')dnl
 dnl
 dnl   -DTEMPERATURE_MINIMUM=value
 dnl     Minimum pressure value supported by meter
-define(TEMPERATURE_MINIMUM_f, 0)dnl
-define(TEMPERATURE_MINIMUM_c, -20)dnl
-ifdef(`TEMPERATURE_MINIMUM', `', `define(`TEMPERATURE_MINIMUM', indir(TEMPERATURE_MINIMUM_`'TEMPERATURE_UNIT))')dnl
+ifdef(`TEMPERATURE_MINIMUM', `', `define(`TEMPERATURE_MINIMUM', ifelse(TEMPERATURE_UNIT, `f', 0, -20))')dnl
 dnl
 dnl   -DTEMPERATURE_MAXIMUM=value
 dnl     Maximum pressure value supported by meter
-define(TEMPERATURE_MAXIMUM_f, 120)dnl
-define(TEMPERATURE_MAXIMUM_c, 50)dnl
-ifdef(`TEMPERATURE_MAXIMUM', `', `define(`TEMPERATURE_MAXIMUM', indir(TEMPERATURE_MAXIMUM_`'TEMPERATURE_UNIT))')dnl
+ifdef(`TEMPERATURE_MAXIMUM', `', `define(`TEMPERATURE_MAXIMUM', ifelse(TEMPERATURE_UNIT, `f', 120, 50))')dnl
 ---
 
 include(m5stack_atoms3r.m4)dnl
@@ -306,7 +302,7 @@ sensor:
   ifelse(TEMPERATURE_UNIT, `c', `
             - lvgl.label.update:
                 id: temperature_label_
-                text: !lambda return str_sprintf("PRESSURE_FORMAT", x);')
+                text: !lambda return str_sprintf("TEMPERATURE_FORMAT", x);')
 
   - platform: template
     id: temperature_fahrenheit_
@@ -325,7 +321,7 @@ ifelse(TEMPERATURE_UNIT, `f', `
     on_value:
       lvgl.label.update:
         id: temperature_label_
-        text: !lambda return str_sprintf("PRESSURE_FORMAT", x);')
+        text: !lambda return str_sprintf("TEMPERATURE_FORMAT", x);')
 
   - platform: template
     id: pressure_psi_
