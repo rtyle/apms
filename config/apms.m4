@@ -113,7 +113,18 @@ esphome:
       id: after_boot_
       value: "true"
 
-esp32: *m5stack_atoms3r_esp32
+esp32:
+  <<: *m5stack_atoms3r_esp32
+  framework:
+    <<: *m5stack_atoms3r_esp32_framework
+    sdkconfig_options:
+      <<: *m5stack_atoms3r_esp32_framework_sdkconfig_options
+      CONFIG_PARTITION_TABLE_OFFSET: "0xf000"
+      CONFIG_SECURE_FLASH_ENC_ENABLED: "y"
+      CONFIG_SECURE_FLASH_ENCRYPTION_AES256: "y"
+      CONFIG_NVS_ENCRYPTION: "n"
+      CONFIG_NVS_SEC_KEY_PROTECT_USING_FLASH_ENC: "n"
+  partitions: partitions.csv
 
 psram: *m5stack_atoms3r_psram
 

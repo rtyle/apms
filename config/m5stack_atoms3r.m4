@@ -60,17 +60,17 @@ define(M5STACK_ATOM_DISPLAY_SIZE, M5STACK_ATOM_DISPLAY_WIDTH`'x`'M5STACK_ATOM_DI
 
   esphome: &namespace`'_esphome {}
 
-  esp32: &namespace`'_esp32
-    board: esp32-s3-devkitc-1
-    variant: esp32s3
-    flash_size: 8MB
-    cpu_frequency: 240Mhz
-    framework:
-      type: esp-idf
-      sdkconfig_options:
-        CONFIG_ESP32S3_DEFAULT_CPU_FREQ_240: "y"
-        CONFIG_ESP32S3_DATA_CACHE_64KB: "y"
-        CONFIG_ESP32S3_DATA_CACHE_LINE_64B: "y"
+  esp32:
+    - &namespace`'_esp32
+      board: esp32-s3-devkitc-1
+      variant: esp32s3
+      flash_size: 8MB
+      cpu_frequency: 240Mhz
+    - framework: &namespace`'_esp32_framework
+        type: esp-idf
+    - framework_sdkconfig_options: &namespace`'_esp32_framework_sdkconfig_options
+          CONFIG_ESP32S3_DATA_CACHE_64KB: "y"
+          CONFIG_ESP32S3_DATA_CACHE_LINE_64B: "y"
 
   psram: &namespace`'_psram
     mode: octal
