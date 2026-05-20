@@ -53,9 +53,10 @@ define(M5STACK_ATOM_DISPLAY_HEIGHT, 128)dnl
 define(M5STACK_ATOM_DISPLAY_SIZE, M5STACK_ATOM_DISPLAY_WIDTH`'x`'M5STACK_ATOM_DISPLAY_HEIGHT)dnl
 .namespace:
 
-  external_components: &namespace`'_external_components
-    source: github://m5stack/esphome-yaml/components@main
-    components: [lp5562]
+  external_components: 
+    - &namespace`'_external_components
+      source: github://m5stack/esphome-yaml/components@main
+      components: [lp5562]
 
   esphome: &namespace`'_esphome {}
 
