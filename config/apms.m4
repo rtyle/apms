@@ -25,6 +25,14 @@ dnl   -DSMTP=value
 dnl     Value is the name of the file that declares the smtp_ component
 ifdef(`SMTP', `', `define(`SMTP', `smtp.m4')')dnl
 dnl
+dnl   -DRAW_PRESSURE_PSI_0=value
+dnl     tem3200 raw_pressure value that maps to 0 psi
+ifdef(`RAW_PRESSURE_PSI_0', `', `define(`RAW_PRESSURE_PSI_0', 1000)')dnl
+dnl
+dnl   -DRAW_PRESSURE_PSI_100=value
+dnl     tem3200 raw_pressure value that maps to 100 psi
+ifdef(`RAW_PRESSURE_PSI_100', `', `define(`RAW_PRESSURE_PSI_100', 15000)')dnl
+dnl
 dnl   -DPRESSURE_UNIT=value
 dnl     Unit value (psi or mbar) for pressure
 ifdef(`PRESSURE_UNIT', `define(`PRESSURE_UNIT', translit(PRESSURE_UNIT, `A-Z', `a-z'))', `define(`PRESSURE_UNIT', `psi')')dnl
@@ -376,13 +384,8 @@ ifelse(TEMPERATURE_UNIT, `f', `
       return id(pressure_).state;
     filters:
       - calibrate_linear:
-          - 1000 -> 0
-          - 1700 -> 5
-          - 2400 -> 10
-          - 8000 -> 50
-          - 13600 -> 90
-          - 14300 -> 95
-          - 15000 -> 100`'dnl
+          - RAW_PRESSURE_PSI_0 -> 0
+          - RAW_PRESSURE_PSI_100 -> 100`'dnl
 ifelse(PRESSURE_UNIT, `psi', `
     on_value:
       - lvgl.indicator.update:
