@@ -21,6 +21,10 @@ dnl   -DLOGGER_LEVEL=value
 dnl     Value of the level key of the logger component.
 ifdef(`LOGGER_LEVEL', `', `define(`LOGGER_LEVEL', `INFO')')dnl
 dnl
+dnl   -DUPDATE_INTERVAL=value
+dnl     Value of the update_interval key of the tem3200 component.
+ifdef(`UPDATE_INTERVAL', `', `define(`UPDATE_INTERVAL', `60s')')dnl
+dnl
 dnl   -DSMTP=value
 dnl     Value is the name of the file that declares the smtp_ component
 ifdef(`SMTP', `', `define(`SMTP', `smtp.m4')')dnl
@@ -102,9 +106,6 @@ debug:
   update_interval: 60s
 
 globals:
-  - id: after_boot_
-    type: bool
-    initial_value: "false"
   - id: button_held_
     type: bool
     initial_value: "false"
@@ -116,10 +117,6 @@ globals:
 esphome:
   <<: *m5stack_atoms3r_esphome
   name: NAME
-  on_boot:
-    globals.set:
-      id: after_boot_
-      value: "true"
 
 esp32:
   <<: *m5stack_atoms3r_esp32
@@ -219,6 +216,20 @@ binary_sensor:
                     transition_length: 0ms
                     brightness: !lambda return id(light_).current_values.get_brightness();
 
+  - id: pressure_threshold_alarm_
+    name: pressure threshold alarm
+    platform: template
+    device_class: problem
+    trigger_on_initial_state: true
+ifdef(`_smtp_defined', `dnl
+    on_press:
+      smtp_.send:
+        subject: !lambda return str_sprintf("NAME pressure (PRESSURE_FORMAT PRESSURE_UNIT) >= PRESSURE_THRESHOLD", id(pressure_`'PRESSURE_UNIT`'_).state);
+    on_release:
+      smtp_.send:
+        subject: !lambda return str_sprintf("NAME pressure (PRESSURE_FORMAT PRESSURE_UNIT) < PRESSURE_THRESHOLD", id(pressure_`'PRESSURE_UNIT`'_).state);
+')dnl
+
 display:
   - <<: *m5stack_atoms3r_display
     id: display_
@@ -231,33 +242,6 @@ text_sensor:
       name: debug device
     reset_reason:
       name: debug reset_reason
-
-switch:
-  - platform: template
-    id: pressure_threshold_alarm_
-    name: pressure threshold alarm
-    restore_mode: RESTORE_DEFAULT_OFF
-    optimistic: true`'dnl
-ifdef(`_smtp_defined', `
-    on_turn_off:
-      if:
-        condition:
-          lambda: return id(after_boot_);
-        then:
-          smtp_.send:
-            subject: !lambda return str_sprintf("apms pressure (PRESSURE_FORMAT PRESSURE_UNIT) < PRESSURE_THRESHOLD", id(pressure_`'PRESSURE_UNIT`'_).state);
-    on_turn_on:
-      if:
-        condition:
-          lambda: return id(after_boot_);
-        then:
-          smtp_.send:
-            subject: !lambda return str_sprintf("apms pressure (PRESSURE_FORMAT PRESSURE_UNIT) >= PRESSURE_THRESHOLD", id(pressure_`'PRESSURE_UNIT`'_).state);')
-
-  - platform: template
-    id: temperature_measurement_alarm_
-    restore_mode: RESTORE_DEFAULT_OFF
-    optimistic: true
 
 sensor:
   - platform: debug
@@ -275,7 +259,7 @@ sensor:
   - platform: tem3200
     id: tem3200_
     i2c_id: m5stack_atoms3r_i2c_grove
-    update_interval: 60s
+    update_interval: UPDATE_INTERVAL
 
     raw_pressure:
       id: pressure_
@@ -293,13 +277,17 @@ define(`_pressure_unit_on_value', `dnl
                 level: INFO
                 format: "NAME pressure (PRESSURE_FORMAT PRESSURE_UNIT) < PRESSURE_THRESHOLD"
                 args: [x]
-            - switch.turn_off: pressure_threshold_alarm_
+            - binary_sensor.template.publish:
+                id: pressure_threshold_alarm_
+                state: OFF
           else:
             - logger.log:
                 level: WARN
                 format: "NAME pressure (PRESSURE_FORMAT PRESSURE_UNIT) >= PRESSURE_THRESHOLD"
                 args: [x]
-            - switch.turn_on: pressure_threshold_alarm_
+            - binary_sensor.template.publish:
+                id: pressure_threshold_alarm_
+                state: ON
       - lvgl.indicator.update:
           id: pressure_indicator_
           value: !lambda return x;
