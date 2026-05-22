@@ -234,27 +234,6 @@ text_sensor:
 
 switch:
   - platform: template
-    id: pressure_measurement_alarm_
-    name: pressure measurement alarm
-    restore_mode: RESTORE_DEFAULT_OFF
-    optimistic: true`'dnl
-ifdef(`_smtp_defined', `
-    on_turn_off:
-      if:
-        condition:
-          lambda: return id(after_boot_);
-        then:
-          smtp_.send:
-            subject: !lambda return str_sprintf("apms pressure measurement success (now PRESSURE_FORMAT PRESSURE_UNIT)", id(pressure_`'PRESSURE_UNIT`'_).state);
-    on_turn_on:
-      if:
-        condition:
-          lambda: return id(after_boot_);
-        then:
-          smtp_.send:
-            subject: !lambda return str_sprintf("apms pressure measurement failure (was PRESSURE_FORMAT PRESSURE_UNIT)", id(pressure_`'PRESSURE_UNIT`'_).state);')
-
-  - platform: template
     id: pressure_threshold_alarm_
     name: pressure threshold alarm
     restore_mode: RESTORE_DEFAULT_OFF
@@ -302,76 +281,50 @@ sensor:
       id: pressure_
       internal: true
       on_value:
-        if:
+        - component.update: pressure_psi_
+        - component.update: pressure_mbar_
+define(`_pressure_unit_on_value', `dnl
+    on_value:
+      - if:
           condition:
-            lambda: return std::isnan(x);
+            lambda: return x < PRESSURE_THRESHOLD;
           then:
-            - switch.turn_on: pressure_measurement_alarm_
-            - lvgl.widget.hide: pressure_meter_
+            - logger.log:
+                level: INFO
+                format: "NAME pressure (PRESSURE_FORMAT PRESSURE_UNIT) < PRESSURE_THRESHOLD"
+                args: [x]
+            - switch.turn_off: pressure_threshold_alarm_
           else:
-            - component.update: pressure_psi_
-            - component.update: pressure_mbar_
-            - switch.turn_off: pressure_measurement_alarm_
-            - lvgl.widget.show: pressure_meter_
-            - if:
-                condition:
-                  lambda: return id(pressure_`'PRESSURE_UNIT`'_).state < PRESSURE_THRESHOLD;
-                then:
-                  - logger.log:
-                      level: INFO
-                      format: "NAME pressure (PRESSURE_FORMAT PRESSURE_UNIT) < PRESSURE_THRESHOLD"
-                      args: [id(pressure_`'PRESSURE_UNIT`'_).state]
-                  - switch.turn_off: pressure_threshold_alarm_
-                else:
-                  - logger.log:
-                      level: WARN
-                      format: "NAME pressure (PRESSURE_FORMAT PRESSURE_UNIT) >= PRESSURE_THRESHOLD"
-                      args: [id(pressure_`'PRESSURE_UNIT`'_).state]
-                  - switch.turn_on: pressure_threshold_alarm_
+            - logger.log:
+                level: WARN
+                format: "NAME pressure (PRESSURE_FORMAT PRESSURE_UNIT) >= PRESSURE_THRESHOLD"
+                args: [x]
+            - switch.turn_on: pressure_threshold_alarm_
+      - lvgl.indicator.update:
+          id: pressure_indicator_
+          value: !lambda return x;
+      - lvgl.widget.show: pressure_meter_
+      - lvgl.label.update:
+          id: pressure_label_
+          text: !lambda return str_sprintf("PRESSURE_FORMAT", x);
+')dnl
 
     temperature:
-      id: temperature_celsius_
-      name: temperature celsius
+      id: temperature_
+      internal: true
       on_value:
-        if:
-          condition:
-            lambda: return std::isnan(x);
-          then:
-            - switch.turn_on: temperature_measurement_alarm_
-            - lvgl.widget.hide: temperature_meter_
-          else:
-            - component.update: temperature_fahrenheit_
-            - switch.turn_off: temperature_measurement_alarm_
-            - lvgl.widget.show: temperature_meter_`'dnl
-  ifelse(TEMPERATURE_UNIT, `c', `
-            - lvgl.indicator.update:
-                id: temperature_indicator_
-                value: !lambda return x;
-            - lvgl.label.update:
-                id: temperature_label_
-                text: !lambda return str_sprintf("TEMPERATURE_FORMAT", x);')
-
-  - platform: template
-    id: temperature_fahrenheit_
-    name: temperature fahrenheit
-    update_interval: never
-    unit_of_measurement: °F
-    state_class: measurement
-    device_class: temperature
-    lambda: |-
-      return id(temperature_celsius_).state;
-    filters:
-      - calibrate_linear:
-          - 0 -> 32
-          - 100 -> 212`'dnl
-ifelse(TEMPERATURE_UNIT, `f', `
+        - component.update: temperature_celsius_
+        - component.update: temperature_fahrenheit_
+define(`_temperature_unit_on_value', `dnl
     on_value:
       - lvgl.indicator.update:
           id: temperature_indicator_
           value: !lambda return x;
+      - lvgl.widget.show: temperature_meter_
       - lvgl.label.update:
           id: temperature_label_
-          text: !lambda return str_sprintf("TEMPERATURE_FORMAT", x);')
+          text: !lambda return str_sprintf("TEMPERATURE_FORMAT", x);
+')dnl
 
   - platform: template
     id: pressure_psi_
@@ -385,15 +338,8 @@ ifelse(TEMPERATURE_UNIT, `f', `
     filters:
       - calibrate_linear:
           - RAW_PRESSURE_PSI_0 -> 0
-          - RAW_PRESSURE_PSI_100 -> 100`'dnl
-ifelse(PRESSURE_UNIT, `psi', `
-    on_value:
-      - lvgl.indicator.update:
-          id: pressure_indicator_
-          value: !lambda return x;
-      - lvgl.label.update:
-          id: pressure_label_
-          text: !lambda return str_sprintf("PRESSURE_FORMAT", x);')
+          - RAW_PRESSURE_PSI_100 -> 100
+ifelse(PRESSURE_UNIT, `psi', _pressure_unit_on_value)dnl
 
   - platform: template
     id: pressure_mbar_
@@ -407,15 +353,34 @@ ifelse(PRESSURE_UNIT, `psi', `
     filters:
       - calibrate_linear:
           - 0 -> 0
-          - 1 -> 68.9476`'dnl
-ifelse(PRESSURE_UNIT, `mbar', `
-    on_value:
-      - lvgl.indicator.update:
-          id: pressure_indicator_
-          value: !lambda return x;
-      - lvgl.label.update:
-          id: pressure_label_
-          text: !lambda return str_sprintf("PRESSURE_FORMAT", x);')
+          - 1 -> 68.9476
+ifelse(PRESSURE_UNIT, `mbar', _pressure_unit_on_value)dnl
+
+  - platform: template
+    id: temperature_celsius_
+    name: temperature celsius
+    update_interval: never
+    unit_of_measurement: °C
+    state_class: measurement
+    device_class: temperature
+    lambda: |-
+      return id(temperature_).state;
+ifelse(TEMPERATURE_UNIT, `c', _temperature_unit_on_value)dnl
+
+  - platform: template
+    id: temperature_fahrenheit_
+    name: temperature fahrenheit
+    update_interval: never
+    unit_of_measurement: °F
+    state_class: measurement
+    device_class: temperature
+    lambda: |-
+      return id(temperature_).state;
+    filters:
+      - calibrate_linear:
+          - 0 -> 32
+          - 100 -> 212
+ifelse(TEMPERATURE_UNIT, `f', _temperature_unit_on_value)dnl
 
 image:
   - id: apms_
@@ -485,7 +450,6 @@ lvgl:
                         - line:
                             id: pressure_indicator_
                             color: red
-                            value: PRESSURE_THRESHOLD
               - label:
                   id: pressure_label_
                   align: CENTER
@@ -517,7 +481,6 @@ lvgl:
                         - line:
                             id: temperature_indicator_
                             color: red
-                            value: eval((TEMPERATURE_MINIMUM + TEMPERATURE_MAXIMUM) / 2)
               - label:
                   id: temperature_label_
                   align: CENTER
