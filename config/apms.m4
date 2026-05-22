@@ -22,8 +22,8 @@ dnl     Value of the level key of the logger component.
 ifdef(`LOGGER_LEVEL', `', `define(`LOGGER_LEVEL', `INFO')')dnl
 dnl
 dnl   -DUPDATE_INTERVAL=value
-dnl     Value of the update_interval key of the tem3200 component.
-ifdef(`UPDATE_INTERVAL', `', `define(`UPDATE_INTERVAL', `60s')')dnl
+dnl     Value (in seconds) of the update_interval key of the tem3200 component.
+ifdef(`UPDATE_INTERVAL', `', `define(`UPDATE_INTERVAL', `60')')dnl
 dnl
 dnl   -DSMTP=value
 dnl     Value is the name of the file that declares the smtp_ component
@@ -117,6 +117,8 @@ globals:
 esphome:
   <<: *m5stack_atoms3r_esphome
   name: NAME
+  on_boot:
+    script.execute: pressure_measurement_watchdog_
 
 esp32:
   <<: *m5stack_atoms3r_esp32
@@ -230,6 +232,20 @@ ifdef(`_smtp_defined', `dnl
         subject: !lambda return str_sprintf("NAME pressure (PRESSURE_FORMAT PRESSURE_UNIT) < PRESSURE_THRESHOLD", id(pressure_`'PRESSURE_UNIT`'_).state);
 ')dnl
 
+  - id: pressure_measurement_alarm_
+    name: pressure measurement alarm
+    platform: template
+    device_class: problem
+    trigger_on_initial_state: true
+ifdef(`_smtp_defined', `dnl
+    on_press:
+      smtp_.send:
+        subject: !lambda return str_sprintf("NAME pressure measurement failure (was PRESSURE_FORMAT PRESSURE_UNIT)", id(pressure_`'PRESSURE_UNIT`'_).state);
+    on_release:
+      smtp_.send:
+        subject: !lambda return str_sprintf("NAME pressure measurement success (now PRESSURE_FORMAT PRESSURE_UNIT)", id(pressure_`'PRESSURE_UNIT`'_).state);
+')dnl
+
 display:
   - <<: *m5stack_atoms3r_display
     id: display_
@@ -242,6 +258,19 @@ text_sensor:
       name: debug device
     reset_reason:
       name: debug reset_reason
+
+script:
+  - id: pressure_measurement_watchdog_
+    mode: restart
+    then:
+      - delay: eval(UPDATE_INTERVAL + 10)s
+      - logger.log:
+          level: ERROR
+          format: "NAME pressure measurement failure (was PRESSURE_FORMAT PRESSURE_UNIT)"
+          args: [id(pressure_`'PRESSURE_UNIT`'_).state]
+      - binary_sensor.template.publish:
+          id: pressure_measurement_alarm_
+          state: ON
 
 sensor:
   - platform: debug
@@ -259,7 +288,7 @@ sensor:
   - platform: tem3200
     id: tem3200_
     i2c_id: m5stack_atoms3r_i2c_grove
-    update_interval: UPDATE_INTERVAL
+    update_interval: UPDATE_INTERVAL`'s
 
     raw_pressure:
       id: pressure_
@@ -269,6 +298,10 @@ sensor:
         - component.update: pressure_mbar_
 define(`_pressure_unit_on_value', `dnl
     on_value:
+      - binary_sensor.template.publish:
+          id: pressure_measurement_alarm_
+          state: OFF
+      - script.execute: pressure_measurement_watchdog_
       - if:
           condition:
             lambda: return x < PRESSURE_THRESHOLD;
@@ -337,11 +370,11 @@ ifelse(PRESSURE_UNIT, `psi', _pressure_unit_on_value)dnl
     state_class: measurement
     device_class: pressure
     lambda: |-
-      return id(pressure_psi_).state;
+      return id(pressure_).state;
     filters:
       - calibrate_linear:
-          - 0 -> 0
-          - 1 -> 68.9476
+          - RAW_PRESSURE_PSI_0 -> 0
+          - RAW_PRESSURE_PSI_100 -> 6894.76
 ifelse(PRESSURE_UNIT, `mbar', _pressure_unit_on_value)dnl
 
   - platform: template
