@@ -30,8 +30,8 @@ MINOR_LEN = 48
 UNIT_DEFS = {
     "psi": dict(vmin=0, vmax=100, major_step=20, minor_div=4, label="PSI"),
     "mbar": dict(vmin=0, vmax=7, major_step=1, minor_div=5, label="BAR"),
-    "f": dict(vmin=0, vmax=120, major_step=20, minor_div=4, label="°F"),
-    "c": dict(vmin=-20, vmax=50, major_step=10, minor_div=5, label="°C"),
+    "fahrenheit": dict(vmin=0, vmax=120, major_step=20, minor_div=4, label="°F"),
+    "celsius": dict(vmin=-20, vmax=50, major_step=10, minor_div=5, label="°C"),
 }
 
 COLOR = "#ffffff"
@@ -50,7 +50,7 @@ def label_pos(v, vmin, vmax):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--unit", choices=["psi", "mbar", "f", "c"], required=True)
+    parser.add_argument("--unit", choices=["psi", "mbar", "fahrenheit", "celsius"], required=True)
     args = parser.parse_args()
 
     cfg = UNIT_DEFS[args.unit]

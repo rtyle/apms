@@ -37,13 +37,17 @@ dnl   -DRAW_PRESSURE_PSI_100=value
 dnl     tem3200 raw_pressure value that maps to 100 psi
 ifdef(`RAW_PRESSURE_PSI_100', `', `define(`RAW_PRESSURE_PSI_100', 15000)')dnl
 dnl
+dnl   -DPRESSURE_PRECISION_PSI=value
+dnl     Number of digits after the decimal point for pressure in units of psi
+ifdef(`PRESSURE_PRECISION_PSI', `', `define(`PRESSURE_PRECISION_PSI', 3)')dnl
+dnl
+dnl   -DPRESSURE_PRECISION_MBAR=value
+dnl     Number of digits after the decimal point for pressure in units of mbar
+ifdef(`PRESSURE_PRECISION_MBAR', `', `define(`PRESSURE_PRECISION_MBAR', 1)')dnl
+dnl
 dnl   -DPRESSURE_UNIT=value
 dnl     Unit value (psi or mbar) for pressure
 ifdef(`PRESSURE_UNIT', `define(`PRESSURE_UNIT', translit(PRESSURE_UNIT, `A-Z', `a-z'))', `define(`PRESSURE_UNIT', `psi')')dnl
-dnl
-dnl   -DPRESSURE_FORMAT=value
-dnl     Format for pressure presentation
-ifdef(`PRESSURE_FORMAT', `', `define(`PRESSURE_FORMAT', ifelse(PRESSURE_UNIT, `psi', %.1f, %.0f))')dnl
 dnl
 dnl   -DPRESSURE_MINIMUM=value
 dnl     Minimum pressure value supported by meter
@@ -57,21 +61,31 @@ dnl   -DPRESSURE_THRESHOLD=value
 dnl     Pressure at or over threshold value is alarming
 ifdef(`PRESSURE_THRESHOLD', `', `define(`PRESSURE_THRESHOLD', ifelse(PRESSURE_UNIT, `psi', 80, 5500))')dnl
 dnl
-dnl   -DTEMPERATURE_UNITS=units
-dnl     Unit value (f or c) for temperature
-ifdef(`TEMPERATURE_UNIT', `define(`TEMPERATURE_UNIT', translit(TEMPERATURE_UNIT, `A-Z', `a-z'))', `define(`TEMPERATURE_UNIT', `f')')dnl
+dnl   -DTEMPERATURE_PRECISION_FAHRENHEIT=value
+dnl     Number of digits after the decimal point for temperature in units of degrees fahrenheit
+ifdef(`TEMPERATURE_PRECISION_FAHRENHEIT', `', `define(`TEMPERATURE_PRECISION_FAHRENHEIT', 1)')dnl
 dnl
-dnl   -DTEMPERATURE_FORMAT=value
-dnl     Format for temperature presentation
-ifdef(`TEMPERATURE_FORMAT', `', `define(`TEMPERATURE_FORMAT', ifelse(TEMPERATURE_UNIT, `f', %.1f, %.2f))')dnl
+dnl   -DTEMPERATURE_PRECISION_CELSIUS=value
+dnl     Number of digits after the decimal point for temperature in units of degrees celsius
+ifdef(`TEMPERATURE_PRECISION_CELSIUS', `', `define(`TEMPERATURE_PRECISION_CELSIUS', 1)')dnl
+dnl
+dnl   -DTEMPERATURE_UNIT=value
+dnl     Unit value (fahrenheit or celsius) for temperature
+ifdef(`TEMPERATURE_UNIT', `define(`TEMPERATURE_UNIT', translit(TEMPERATURE_UNIT, `A-Z', `a-z'))', `define(`TEMPERATURE_UNIT', `fahrenheit')')dnl
 dnl
 dnl   -DTEMPERATURE_MINIMUM=value
 dnl     Minimum pressure value supported by meter
-ifdef(`TEMPERATURE_MINIMUM', `', `define(`TEMPERATURE_MINIMUM', ifelse(TEMPERATURE_UNIT, `f', 0, -20))')dnl
+ifdef(`TEMPERATURE_MINIMUM', `', `define(`TEMPERATURE_MINIMUM', ifelse(TEMPERATURE_UNIT, `fahrenheit', 0, -20))')dnl
 dnl
 dnl   -DTEMPERATURE_MAXIMUM=value
 dnl     Maximum pressure value supported by meter
-ifdef(`TEMPERATURE_MAXIMUM', `', `define(`TEMPERATURE_MAXIMUM', ifelse(TEMPERATURE_UNIT, `f', 120, 50))')dnl
+ifdef(`TEMPERATURE_MAXIMUM', `', `define(`TEMPERATURE_MAXIMUM', ifelse(TEMPERATURE_UNIT, `fahrenheit', 120, 50))')dnl
+dnl
+define(`_pressure_precision', indir(`PRESSURE_PRECISION_'ifelse(PRESSURE_UNIT, `psi', PSI, MBAR)))dnl
+define(`_pressure_format', `%.'_pressure_precision`f')dnl
+dnl
+define(`_temperature_precision', indir(`TEMPERATURE_PRECISION_'ifelse(TEMPERATURE_UNIT, `fahrenheit', FAHRENHEIT, CELSIUS)))dnl
+define(`_temperature_format', `%.'_temperature_precision`f')dnl
 ---
 
 include(m5stack_atoms3r.m4)dnl
@@ -226,10 +240,10 @@ binary_sensor:
 ifdef(`_smtp_defined', `dnl
     on_press:
       smtp_.send:
-        subject: !lambda return str_sprintf("NAME pressure (PRESSURE_FORMAT PRESSURE_UNIT) >= PRESSURE_THRESHOLD", id(pressure_`'PRESSURE_UNIT`'_).state);
+        subject: !lambda return str_sprintf("NAME pressure (_pressure_format PRESSURE_UNIT) >= PRESSURE_THRESHOLD", id(pressure_`'PRESSURE_UNIT`'_).state);
     on_release:
       smtp_.send:
-        subject: !lambda return str_sprintf("NAME pressure (PRESSURE_FORMAT PRESSURE_UNIT) < PRESSURE_THRESHOLD", id(pressure_`'PRESSURE_UNIT`'_).state);
+        subject: !lambda return str_sprintf("NAME pressure (_pressure_format PRESSURE_UNIT) < PRESSURE_THRESHOLD", id(pressure_`'PRESSURE_UNIT`'_).state);
 ')dnl
 
   - id: pressure_measurement_alarm_
@@ -240,10 +254,10 @@ ifdef(`_smtp_defined', `dnl
 ifdef(`_smtp_defined', `dnl
     on_press:
       smtp_.send:
-        subject: !lambda return str_sprintf("NAME pressure measurement failure (was PRESSURE_FORMAT PRESSURE_UNIT)", id(pressure_`'PRESSURE_UNIT`'_).state);
+        subject: !lambda return str_sprintf("NAME pressure measurement failure (was _pressure_format PRESSURE_UNIT)", id(pressure_`'PRESSURE_UNIT`'_).state);
     on_release:
       smtp_.send:
-        subject: !lambda return str_sprintf("NAME pressure measurement success (now PRESSURE_FORMAT PRESSURE_UNIT)", id(pressure_`'PRESSURE_UNIT`'_).state);
+        subject: !lambda return str_sprintf("NAME pressure measurement success (now _pressure_format PRESSURE_UNIT)", id(pressure_`'PRESSURE_UNIT`'_).state);
 ')dnl
 
 display:
@@ -266,7 +280,7 @@ script:
       - delay: eval(UPDATE_INTERVAL + 10)s
       - logger.log:
           level: ERROR
-          format: "NAME pressure measurement failure (was PRESSURE_FORMAT PRESSURE_UNIT)"
+          format: "NAME pressure measurement failure (was _pressure_format PRESSURE_UNIT)"
           args: [id(pressure_`'PRESSURE_UNIT`'_).state]
       - binary_sensor.template.publish:
           id: pressure_measurement_alarm_
@@ -308,7 +322,7 @@ define(`_pressure_unit_on_value', `dnl
           then:
             - logger.log:
                 level: INFO
-                format: "NAME pressure (PRESSURE_FORMAT PRESSURE_UNIT) < PRESSURE_THRESHOLD"
+                format: "NAME pressure (_pressure_format PRESSURE_UNIT) < PRESSURE_THRESHOLD"
                 args: [x]
             - binary_sensor.template.publish:
                 id: pressure_threshold_alarm_
@@ -316,18 +330,20 @@ define(`_pressure_unit_on_value', `dnl
           else:
             - logger.log:
                 level: WARN
-                format: "NAME pressure (PRESSURE_FORMAT PRESSURE_UNIT) >= PRESSURE_THRESHOLD"
+                format: "NAME pressure (_pressure_format PRESSURE_UNIT) >= PRESSURE_THRESHOLD"
                 args: [x]
             - binary_sensor.template.publish:
                 id: pressure_threshold_alarm_
                 state: ON
       - lvgl.indicator.update:
           id: pressure_indicator_
-          value: !lambda return x;
+          value: !lambda return x * eval(10**_pressure_precision);
       - lvgl.widget.show: pressure_meter_
       - lvgl.label.update:
-          id: pressure_label_
-          text: !lambda return str_sprintf("PRESSURE_FORMAT", x);
+          id: pressure_label_`'dnl
+ifelse(PRESSURE_UNIT, `psi', `
+          text: !lambda return str_sprintf("_pressure_format", x);', `
+          text: !lambda return str_sprintf("`%.'eval(PRESSURE_PRECISION_MBAR + 3)`f'", x / eval(10**3));')
 ')dnl
 
     temperature:
@@ -340,20 +356,21 @@ define(`_temperature_unit_on_value', `dnl
     on_value:
       - lvgl.indicator.update:
           id: temperature_indicator_
-          value: !lambda return x;
+          value: !lambda return x * eval(10**_temperature_precision);
       - lvgl.widget.show: temperature_meter_
       - lvgl.label.update:
           id: temperature_label_
-          text: !lambda return str_sprintf("TEMPERATURE_FORMAT", x);
+          text: !lambda return str_sprintf("_temperature_format", x);
 ')dnl
 
   - platform: template
     id: pressure_psi_
     name: pressure psi
     update_interval: never
-    unit_of_measurement: PSI
+    unit_of_measurement: psi
     state_class: measurement
     device_class: pressure
+    accuracy_decimals: PRESSURE_PRECISION_PSI
     lambda: |-
       return id(pressure_).state;
     filters:
@@ -369,6 +386,7 @@ ifelse(PRESSURE_UNIT, `psi', _pressure_unit_on_value)dnl
     unit_of_measurement: mbar
     state_class: measurement
     device_class: pressure
+    accuracy_decimals: PRESSURE_PRECISION_MBAR
     lambda: |-
       return id(pressure_).state;
     filters:
@@ -384,9 +402,10 @@ ifelse(PRESSURE_UNIT, `mbar', _pressure_unit_on_value)dnl
     unit_of_measurement: °C
     state_class: measurement
     device_class: temperature
+    accuracy_decimals: TEMPERATURE_PRECISION_CELSIUS
     lambda: |-
       return id(temperature_).state;
-ifelse(TEMPERATURE_UNIT, `c', _temperature_unit_on_value)dnl
+ifelse(TEMPERATURE_UNIT, `fahrenheit', `', _temperature_unit_on_value)dnl
 
   - platform: template
     id: temperature_fahrenheit_
@@ -395,13 +414,14 @@ ifelse(TEMPERATURE_UNIT, `c', _temperature_unit_on_value)dnl
     unit_of_measurement: °F
     state_class: measurement
     device_class: temperature
+    accuracy_decimals: TEMPERATURE_PRECISION_FAHRENHEIT
     lambda: |-
       return id(temperature_).state;
     filters:
       - calibrate_linear:
           - 0 -> 32
           - 100 -> 212
-ifelse(TEMPERATURE_UNIT, `f', _temperature_unit_on_value)dnl
+ifelse(TEMPERATURE_UNIT, `fahrenheit', _temperature_unit_on_value)dnl
 
 image:
   - id: apms_
@@ -465,8 +485,8 @@ lvgl:
                   height: 100%
                   hidden: true
                   scales:
-                    - range_from: PRESSURE_MINIMUM
-                      range_to: PRESSURE_MAXIMUM
+                    - range_from: eval(10**_pressure_precision * PRESSURE_MINIMUM)
+                      range_to: eval(10**_pressure_precision * PRESSURE_MAXIMUM)
                       indicators:
                         - line:
                             id: pressure_indicator_
@@ -496,8 +516,8 @@ lvgl:
                   height: 100%
                   hidden: true
                   scales:
-                    - range_from: TEMPERATURE_MINIMUM
-                      range_to: TEMPERATURE_MAXIMUM
+                    - range_from: eval(10**_temperature_precision * TEMPERATURE_MINIMUM)
+                      range_to: eval(10**_temperature_precision * TEMPERATURE_MAXIMUM)
                       indicators:
                         - line:
                             id: temperature_indicator_
