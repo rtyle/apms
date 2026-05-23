@@ -285,6 +285,8 @@ script:
       - binary_sensor.template.publish:
           id: pressure_measurement_alarm_
           state: ON
+      - lvgl.widget.hide: pressure_meter_
+      - lvgl.widget.hide: temperature_meter_
 
 sensor:
   - platform: debug
