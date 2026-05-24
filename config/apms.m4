@@ -347,7 +347,7 @@ define(`_pressure_unit_on_value', `dnl
           id: pressure_label_`'dnl
 ifelse(PRESSURE_UNIT, `psi', `
           text: !lambda return str_sprintf("_pressure_format", x);', `
-          # pressure_meter_ scale_mbar.png units are bar, adjust pressure_label_ text to match
+          # pressure_meter_ scale_mbar.png unit is BAR, adjust pressure_label_ text to match
           text: !lambda return str_sprintf("`%.'eval(PRESSURE_PRECISION_MBAR + 3)`f'", x / eval(10**3));')
 ')dnl
 
