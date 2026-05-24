@@ -81,6 +81,8 @@ dnl   -DTEMPERATURE_MAXIMUM=value
 dnl     Maximum pressure value supported by meter
 ifdef(`TEMPERATURE_MAXIMUM', `', `define(`TEMPERATURE_MAXIMUM', ifelse(TEMPERATURE_UNIT, `fahrenheit', 120, 50))')dnl
 dnl
+define(`_pressure_state', `id(pressure_'PRESSURE_UNIT`_).state')dnl
+dnl
 define(`_pressure_precision', indir(`PRESSURE_PRECISION_'ifelse(PRESSURE_UNIT, `psi', PSI, MBAR)))dnl
 define(`_pressure_format', `%.'_pressure_precision`f')dnl
 dnl
@@ -240,10 +242,10 @@ binary_sensor:
 ifdef(`_smtp_defined', `dnl
     on_press:
       smtp_.send:
-        subject: !lambda return str_sprintf("NAME pressure (_pressure_format PRESSURE_UNIT) >= PRESSURE_THRESHOLD", id(pressure_`'PRESSURE_UNIT`'_).state);
+        subject: !lambda return str_sprintf("NAME pressure (_pressure_format PRESSURE_UNIT) >= PRESSURE_THRESHOLD", _pressure_state);
     on_release:
       smtp_.send:
-        subject: !lambda return str_sprintf("NAME pressure (_pressure_format PRESSURE_UNIT) < PRESSURE_THRESHOLD", id(pressure_`'PRESSURE_UNIT`'_).state);
+        subject: !lambda return str_sprintf("NAME pressure (_pressure_format PRESSURE_UNIT) < PRESSURE_THRESHOLD", _pressure_state);
 ')dnl
 
   - id: pressure_measurement_alarm_
@@ -254,10 +256,10 @@ ifdef(`_smtp_defined', `dnl
 ifdef(`_smtp_defined', `dnl
     on_press:
       smtp_.send:
-        subject: !lambda return str_sprintf("NAME pressure measurement failure (was _pressure_format PRESSURE_UNIT)", id(pressure_`'PRESSURE_UNIT`'_).state);
+        subject: !lambda return str_sprintf("NAME pressure measurement failure (was _pressure_format PRESSURE_UNIT)", _pressure_state);
     on_release:
       smtp_.send:
-        subject: !lambda return str_sprintf("NAME pressure measurement success (now _pressure_format PRESSURE_UNIT)", id(pressure_`'PRESSURE_UNIT`'_).state);
+        subject: !lambda return str_sprintf("NAME pressure measurement success (now _pressure_format PRESSURE_UNIT)", _pressure_state);
 ')dnl
 
 display:
@@ -281,7 +283,7 @@ script:
       - logger.log:
           level: ERROR
           format: "NAME pressure measurement failure (was _pressure_format PRESSURE_UNIT)"
-          args: [id(pressure_`'PRESSURE_UNIT`'_).state]
+          args: [_pressure_state]
       - binary_sensor.template.publish:
           id: pressure_measurement_alarm_
           state: ON
