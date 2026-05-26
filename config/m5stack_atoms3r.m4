@@ -102,14 +102,13 @@ define(M5STACK_ATOM_DISPLAY_SIZE, M5STACK_ATOM_DISPLAY_WIDTH`'x`'M5STACK_ATOM_DI
       sda: indir(NAMESPACE`'_GROVE_1)
       scan: true
 
-  lp5562:
-    - &namespace`'_lp5562
-      id: namespace`'_lp5562
-      i2c_id: namespace`'_i2c
-      use_internal_clk: true
-      high_pwm_freq: true
-      logarithmic_dimming: true
-      white_current: 17.5
+  lp5562: &namespace`'_lp5562
+    id: namespace`'_lp5562
+    i2c_id: namespace`'_i2c
+    use_internal_clk: true
+    high_pwm_freq: true
+    logarithmic_dimming: true
+    white_current: 17.5
 
   output:
     - &namespace`'_output

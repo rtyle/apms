@@ -158,11 +158,10 @@ i2c:
     scl_pullup_enabled: false
     sda_pullup_enabled: false
 
-lp5562:
-  <<: *m5stack_atoms3r_lp5562
+lp5562: *m5stack_atoms3r_lp5562
 
 output:
-  <<: *m5stack_atoms3r_output
+  - *m5stack_atoms3r_output
 
 spi: *m5stack_atoms3r_spi
 
