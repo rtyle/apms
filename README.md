@@ -54,7 +54,7 @@ that can be threaded (by way of an air chuck) into a Schrader valve.
 External I²C pullup resistors are required.
 See TE M3200 datasheet: “In most cases, 4.7kΩ is a reasonable choice.“
 These can be soldered inline or applied to a grove to grove connector.
-For bench testing, a grove to 4-pin extension connetor and a breadboard are convenient.
+For bench testing, a grove to 4-pin extension connector and a breadboard are convenient.
 
 * [M5Stack Grove Cable (A034-B)](https://docs.m5stack.com/en/accessory/cable/grove_cable)
     [Digikey](https://www.digikey.com/en/products/detail/m5stack-technology-co-ltd/A034-B/16370068)
