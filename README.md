@@ -112,6 +112,12 @@ Each ¼″ NPT fitting should use a high quality thread sealant.
 * [Blue Monster thread sealant with PFTE (76009)](https://cleanfit.com/blue_monster_industrial_grade_thread_sealant_76001.shtml)
     [Home Depot](https://www.homedepot.com/pep/306136383)
 
+The gaskets on the Schrader valves should be sealed as well.
+
+* [Refrigeration Technologies Nylog Blue gasket & thread sealant (RT201BP)](https://www.refrigtech.com/nylog-blue/)
+    [Amazon](https://www.amazon.com/dp/B008HOSQQQ)
+    [Home Depot](https://www.homedepot.com/p/333685992)
+
 ### Software
 
 These instructions are written for a Fedora Linux platform.
