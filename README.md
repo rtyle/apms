@@ -156,6 +156,7 @@ Configure secrets.yaml.
 
     cp config/secrets{.example,}.yaml; vi config/secrets.yaml
 
+
 These secrets will be protected by flash encryption on/by the device.
 
 Create an ESPHome configuration.
@@ -184,3 +185,15 @@ To recover from this problem, the device must be flashed properly:
 
 Connect by ethernet to a power-over-ethernet capable port and unplug the USB cable.
 Connect the switched load to the relay.
+
+## Usage
+
+By pressing the integrated display button, **apms** will rotate through its splash screen, pressure meter and thermometer.
+Holding the button will dim the display to black/off.
+The display can be restored to full brightness with another button press.
+
+[Homey](https://homey.app/) integration can be done using [ESPHome Controller](https://homey.app/en-us/app/com.ugrbnk.esphome/ESPHome-Controller)'s
+ESPHome Device. Name the device, identify it by a static IP address or dynamic mDNS name (e.g. apms.local) and enter the api-key from secrets.yaml. Use [Homey Insights](https://homey.app/en-us/features/insights/) to track the pressure and temperature which should be related per the [ideal gas law](https://en.wikipedia.org/wiki/Ideal_gas_law). Use the device in an [advanced flow](https://homey.app/en-us/features/advanced-flow/) to react to events.
+
+[Home Assistant](https://www.home-assistant.io/) integration should be similar.
+
