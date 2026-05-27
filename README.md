@@ -184,7 +184,6 @@ To recover from this problem, the device must be flashed properly:
     python -m esptool --chip esp32s3 --port /dev/ttyACM0 write-flash --encrypt 0x0 $bin/firmware.factory.bin
 
 Connect by ethernet to a power-over-ethernet capable port and unplug the USB cable.
-Connect the switched load to the relay.
 
 ## Usage
 
