@@ -49,14 +49,6 @@ dnl   -DPRESSURE_UNIT=value
 dnl     Unit value (psi or mbar) for pressure
 ifdef(`PRESSURE_UNIT', `define(`PRESSURE_UNIT', translit(PRESSURE_UNIT, `A-Z', `a-z'))', `define(`PRESSURE_UNIT', `psi')')dnl
 dnl
-dnl   -DPRESSURE_MINIMUM=value
-dnl     Minimum pressure value supported by meter
-ifdef(`PRESSURE_MINIMUM', `', `define(`PRESSURE_MINIMUM', ifelse(PRESSURE_UNIT, `psi', 0, 0))')dnl
-dnl
-dnl   -DPRESSURE_MAXIMUM=value
-dnl     Maximum pressure value supported by meter
-ifdef(`PRESSURE_MAXIMUM', `', `define(`PRESSURE_MAXIMUM', ifelse(PRESSURE_UNIT, `psi', 100, 7000))')dnl
-dnl
 dnl   -DPRESSURE_THRESHOLD=value
 dnl     Pressure at or over threshold value is alarming
 ifdef(`PRESSURE_THRESHOLD', `', `define(`PRESSURE_THRESHOLD', ifelse(PRESSURE_UNIT, `psi', 80, 5500))')dnl
@@ -73,21 +65,29 @@ dnl   -DTEMPERATURE_UNIT=value
 dnl     Unit value (fahrenheit or celsius) for temperature
 ifdef(`TEMPERATURE_UNIT', `define(`TEMPERATURE_UNIT', translit(TEMPERATURE_UNIT, `A-Z', `a-z'))', `define(`TEMPERATURE_UNIT', `fahrenheit')')dnl
 dnl
-dnl   -DTEMPERATURE_MINIMUM=value
-dnl     Minimum pressure value supported by meter
-ifdef(`TEMPERATURE_MINIMUM', `', `define(`TEMPERATURE_MINIMUM', ifelse(TEMPERATURE_UNIT, `fahrenheit', 0, -20))')dnl
+dnl   -DBAROMETRIC_PRESSURE_MBAR=value
+dnl     Nominal barometric pressure at installation point
+ifdef(`BAROMETRIC_PRESSURE_MBAR', `', `define(`BAROMETRIC_PRESSURE_MBAR', 1013.25)')dnl
 dnl
-dnl   -DTEMPERATURE_MAXIMUM=value
-dnl     Maximum pressure value supported by meter
-ifdef(`TEMPERATURE_MAXIMUM', `', `define(`TEMPERATURE_MAXIMUM', ifelse(TEMPERATURE_UNIT, `fahrenheit', 120, 50))')dnl
+dnl   -DMOLAR_DENSITY_PRECISION=value
+dnl     Number of digits after the decimal point for molar density in units of mol/m³
+ifdef(`MOLAR_DENSITY_PRECISION', `', `define(`MOLAR_DENSITY_PRECISION', 1)')dnl
 dnl
 define(`_pressure_state', `id(pressure_'PRESSURE_UNIT`_).state')dnl
 dnl
 define(`_pressure_precision', indir(`PRESSURE_PRECISION_'ifelse(PRESSURE_UNIT, `psi', PSI, MBAR)))dnl
 define(`_pressure_format', `%.'_pressure_precision`f')dnl
+define(`_pressure_minimum', ifelse(PRESSURE_UNIT, `psi', 0, 0))dnl
+define(`_pressure_maximum', ifelse(PRESSURE_UNIT, `psi', 100, 7000))dnl
 dnl
 define(`_temperature_precision', indir(`TEMPERATURE_PRECISION_'ifelse(TEMPERATURE_UNIT, `fahrenheit', FAHRENHEIT, CELSIUS)))dnl
 define(`_temperature_format', `%.'_temperature_precision`f')dnl
+define(`_temperature_minimum', ifelse(TEMPERATURE_UNIT, `fahrenheit', 0, -20))dnl
+define(`_temperature_maximum', ifelse(TEMPERATURE_UNIT, `fahrenheit', 120, 50))dnl
+dnl
+define(`_molar_density_format', `%.'MOLAR_DENSITY_PRECISION`f')dnl
+define(`_molar_density_minimum', 0)dnl
+define(`_molar_density_maximum', 400)dnl
 ---
 
 include(m5stack_atoms3r.m4)dnl
@@ -288,6 +288,7 @@ script:
           state: ON
       - lvgl.widget.hide: pressure_meter_
       - lvgl.widget.hide: temperature_meter_
+      - lvgl.widget.hide: molar_density_meter_
 
 sensor:
   - platform: debug
@@ -313,6 +314,11 @@ sensor:
       on_value:
         - component.update: pressure_psi_
         - component.update: pressure_mbar_
+        # TEM3200Component::update calls, in order
+        #   1. this-temperature_sensor_->publish_state(temperature);
+        #   2. this->raw_pressure_sensor_->publish_state(raw_pressure);
+        # now (2) we can update density from raw_pressure and temperature
+        - component.update: molar_density_
 define(`_pressure_unit_on_value', `dnl
     on_value:
       - binary_sensor.template.publish:
@@ -427,6 +433,36 @@ ifelse(TEMPERATURE_UNIT, `fahrenheit', `', _temperature_unit_on_value)dnl
           - 100 -> 212
 ifelse(TEMPERATURE_UNIT, `fahrenheit', _temperature_unit_on_value)dnl
 
+  - platform: template
+    id: molar_density_
+    name: molar density
+    update_interval: never
+    unit_of_measurement: mol/m³
+    state_class: measurement
+    device_class: ""
+    accuracy_decimals: MOLAR_DENSITY_PRECISION
+    # PV = nRT ⇒ n/V (molar density) = P/(R·T)
+    # P is absolute pressure (TE M3200 gauge pressure + barometric pressure)
+    # P in Pa = kg/(m·s²) (1 = 100 Pa/mbar)
+    # V in m³
+    # n in mol
+    # R in kg·m²/(s²·mol·K) (constant = 8.31446)
+    # T in kelvin (273.15 K = 0 °C)
+    lambda: |-
+      return (100.0f * (id(pressure_mbar_).state + BAROMETRIC_PRESSURE_MBAR)) / (8.31446f * (id(temperature_).state + 273.15f));
+    on_value:
+      - logger.log:
+          level: INFO
+          format: "NAME molar_density _molar_density_format mol/m³"
+          args: [x]
+      - lvgl.indicator.update:
+          id: molar_density_indicator_
+          value: !lambda return x * eval(10**MOLAR_DENSITY_PRECISION);
+      - lvgl.widget.show: molar_density_meter_
+      - lvgl.label.update:
+          id: molar_density_label_
+          text: !lambda return str_sprintf("_molar_density_format", x);
+
 image:
   - id: apms_
     file: apms.png
@@ -439,6 +475,11 @@ image:
     transparency: alpha_channel
   - id: temperature_scale_
     file: scale_`'TEMPERATURE_UNIT.png
+    type: rgb565
+    resize: M5STACK_ATOM_DISPLAY_SIZE
+    transparency: alpha_channel
+  - id: molar_density_scale_
+    file: scale_molar_density.png
     type: rgb565
     resize: M5STACK_ATOM_DISPLAY_SIZE
     transparency: alpha_channel
@@ -466,19 +507,19 @@ lvgl:
                   width: 100%
                   height: 100%
                   scales:
-                    - range_from: PRESSURE_MINIMUM
-                      range_to: PRESSURE_MAXIMUM
+                    - range_from: _pressure_minimum
+                      range_to: _pressure_maximum
                       indicators:
                         - arc:
                             color: green
                             width: 8
-                            start_value: PRESSURE_MINIMUM
+                            start_value: _pressure_minimum
                             end_value: PRESSURE_THRESHOLD
                         - arc:
                             color: red
                             width: 8
                             start_value: PRESSURE_THRESHOLD
-                            end_value: PRESSURE_MAXIMUM
+                            end_value: _pressure_maximum
               - image:
                   src: pressure_scale_
                   align: CENTER
@@ -489,8 +530,8 @@ lvgl:
                   height: 100%
                   hidden: true
                   scales:
-                    - range_from: eval(10**_pressure_precision * PRESSURE_MINIMUM)
-                      range_to: eval(10**_pressure_precision * PRESSURE_MAXIMUM)
+                    - range_from: eval(10**_pressure_precision * _pressure_minimum)
+                      range_to: eval(10**_pressure_precision * _pressure_maximum)
                       indicators:
                         - line:
                             id: pressure_indicator_
@@ -520,14 +561,45 @@ lvgl:
                   height: 100%
                   hidden: true
                   scales:
-                    - range_from: eval(10**_temperature_precision * TEMPERATURE_MINIMUM)
-                      range_to: eval(10**_temperature_precision * TEMPERATURE_MAXIMUM)
+                    - range_from: eval(10**_temperature_precision * _temperature_minimum)
+                      range_to: eval(10**_temperature_precision * _temperature_maximum)
                       indicators:
                         - line:
                             id: temperature_indicator_
                             color: red
               - label:
                   id: temperature_label_
+                  align: CENTER
+                  text_color: white
+                  y: 45
+                  text: "--"
+    - widgets:
+        - container:
+            widgets:
+              - obj:
+                  bg_color: black
+                  width: 100%
+                  height: 100%
+                  border_width: 0
+                  radius: 0
+              - image:
+                  src: molar_density_scale_
+                  align: CENTER
+              - meter:
+                  id: molar_density_meter_
+                  bg_opa: TRANSP
+                  width: 100%
+                  height: 100%
+                  hidden: true
+                  scales:
+                    - range_from: eval(10**MOLAR_DENSITY_PRECISION * _molar_density_minimum)
+                      range_to: eval(10**MOLAR_DENSITY_PRECISION * _molar_density_maximum)
+                      indicators:
+                        - line:
+                            id: molar_density_indicator_
+                            color: red
+              - label:
+                  id: molar_density_label_
                   align: CENTER
                   text_color: white
                   y: 45

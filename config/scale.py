@@ -27,11 +27,12 @@ SWEEP = 270.0
 MAJOR_LEN = 80
 MINOR_LEN = 48
 
-UNIT_DEFS = {
-    "psi": dict(vmin=0, vmax=100, major_step=20, minor_div=4, label="PSI"),
-    "mbar": dict(vmin=0, vmax=7, major_step=1, minor_div=5, label="BAR"),
-    "fahrenheit": dict(vmin=0, vmax=120, major_step=20, minor_div=4, label="°F"),
-    "celsius": dict(vmin=-20, vmax=50, major_step=10, minor_div=5, label="°C"),
+UNIT = {
+    "psi": (0, 100, 20, 4, "PSI"),
+    "mbar": (0, 7, 1, 5, "BAR"),
+    "fahrenheit": (0, 120, 20, 4, "°F"),
+    "celsius": (-20, 50, 10, 5, "°C"),
+    "molar_density": (0, 400, 100, 5, "mol/m³"),
 }
 
 COLOR = "#ffffff"
@@ -50,15 +51,10 @@ def label_pos(v, vmin, vmax):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--unit", choices=["psi", "mbar", "fahrenheit", "celsius"], required=True)
+    parser.add_argument("--unit", choices=UNIT.keys(), required=True)
     args = parser.parse_args()
 
-    cfg = UNIT_DEFS[args.unit]
-    vmin = cfg["vmin"]
-    vmax = cfg["vmax"]
-    major = cfg["major_step"]
-    ndiv = cfg["minor_div"]
-    lbl = cfg["label"]
+    vmin, vmax, major, ndiv, lbl = UNIT[args.unit]
 
     # arc endpoints
     def pt(deg):
