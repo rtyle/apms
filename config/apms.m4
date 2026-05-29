@@ -29,8 +29,6 @@ dnl   -DTEMPERATURE_UNIT=value
 dnl     Unit value (fahrenheit or celsius) for temperature
 ifdef(`TEMPERATURE_UNIT', `define(`TEMPERATURE_UNIT', translit(TEMPERATURE_UNIT, `A-Z', `a-z'))', `define(`TEMPERATURE_UNIT', `fahrenheit')')dnl
 dnl
-define(`_pressure_state', `id(pressure_'PRESSURE_UNIT`_).state')dnl
-dnl
 ---
 
 include(m5stack_atoms3r.m4)dnl
@@ -64,6 +62,7 @@ substitutions:
   pressure_threshold: ${pressure[pressure.unit].threshold}
 
   pressure_format: "%.${pressure_precision}f"
+  pressure_state: id(pressure_${pressure.unit}_).state
 
   temperature_unit: TEMPERATURE_UNIT
 
@@ -266,10 +265,10 @@ binary_sensor:
 ifdef(`_smtp_defined', `dnl
     on_press:
       smtp_.send:
-        subject: !lambda return str_sprintf("${name} pressure (${pressure_format} ${pressure.unit}) >= ${pressure_threshold}", _pressure_state);
+        subject: !lambda return str_sprintf("${name} pressure (${pressure_format} ${pressure.unit}) >= ${pressure_threshold}", ${pressure_state});
     on_release:
       smtp_.send:
-        subject: !lambda return str_sprintf("${name} pressure (${pressure_format} ${pressure.unit}) < ${pressure_threshold}", _pressure_state);
+        subject: !lambda return str_sprintf("${name} pressure (${pressure_format} ${pressure.unit}) < ${pressure_threshold}", ${pressure_state});
 ')dnl
 
   - id: pressure_measurement_alarm_
@@ -280,10 +279,10 @@ ifdef(`_smtp_defined', `dnl
 ifdef(`_smtp_defined', `dnl
     on_press:
       smtp_.send:
-        subject: !lambda return str_sprintf("${name} pressure measurement failure (was ${pressure_format} ${pressure.unit})", _pressure_state);
+        subject: !lambda return str_sprintf("${name} pressure measurement failure (was ${pressure_format} ${pressure.unit})", ${pressure_state});
     on_release:
       smtp_.send:
-        subject: !lambda return str_sprintf("${name} pressure measurement success (now ${pressure_format} ${pressure.unit})", _pressure_state);
+        subject: !lambda return str_sprintf("${name} pressure measurement success (now ${pressure_format} ${pressure.unit})", ${pressure_state});
 ')dnl
 
 display:
@@ -307,7 +306,7 @@ script:
       - logger.log:
           level: ERROR
           format: "${name} pressure measurement failure (was ${pressure_format} ${pressure.unit})"
-          args: [_pressure_state]
+          args: ["${pressure_state}"]
       - binary_sensor.template.publish:
           id: pressure_measurement_alarm_
           state: ON
