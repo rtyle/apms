@@ -19,9 +19,9 @@ dnl this should be done selectively so that the configuration only has what is n
   ethernet: &namespace`'_ethernet
     interface: spi3
     type: W5500
-    clk_pin: M5STACK_ATOM_BUS_1_01
-    cs_pin: M5STACK_ATOM_BUS_1_02
-    miso_pin: M5STACK_ATOM_BUS_1_03
-    mosi_pin: M5STACK_ATOM_BUS_1_04
+    clk_pin: ${m5stack_atom_bus._1._1}
+    cs_pin: ${m5stack_atom_bus._1._2}
+    miso_pin: ${m5stack_atom_bus._1._3}
+    mosi_pin: ${m5stack_atom_bus._1._4}
 
 undefine(`namespace')dnl

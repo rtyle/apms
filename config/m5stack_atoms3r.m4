@@ -1,5 +1,4 @@
 define(`namespace', `m5stack_atoms3r')dnl
-define(`NAMESPACE', `M5STACK_ATOMS3R')dnl
 dnl This YAML is not intended for direct consumption by esphome.
 dnl Because its YAML parser does not support anchors and aliases
 dnl between files using !include, we get that feature by including
@@ -19,39 +18,39 @@ dnl
 dnl content is inspired from
 dnl   https://docs.m5stack.com/en/homeassistant/voice_assistant/atoms3r_with_atomic_echo_base_voice_assistant
 dnl   https://github.com/m5stack/esphome-yaml/blob/main/common/atoms3r-with-echo-base.yaml
-dnl
-dnl define internal GPIO pins
-define(NAMESPACE`'_I2C_SCL, GPIO0)dnl
-define(NAMESPACE`'_I2C_SDA, GPIO45)dnl
-define(NAMESPACE`'_BUTTON, GPIO41)dnl
-define(NAMESPACE`'_IR, GPIO47)dnl
-define(NAMESPACE`'_SPI_CLK, GPIO15)dnl
-define(NAMESPACE`'_SPI_MOSI, GPIO21)dnl
-define(NAMESPACE`'_DISPLAY_DC, GPIO42)dnl
-define(NAMESPACE`'_DISPLAY_RESET, GPIO48)dnl
-define(NAMESPACE`'_DISPLAY_CS, GPIO14)dnl
-dnl
-dnl define external GPIO pins
-define(NAMESPACE`'_GROVE_0, GPIO1)dnl
-define(NAMESPACE`'_GROVE_1, GPIO2)dnl
-define(NAMESPACE`'_GROVE_3, 5V)dnl
-define(NAMESPACE`'_GROVE_4, GND)dnl
-dnl
-define(M5STACK_ATOM_BUS_0_00, GPIO39)dnl
-define(M5STACK_ATOM_BUS_0_01, GPIO38)dnl
-define(M5STACK_ATOM_BUS_0_02, 5V)dnl
-define(M5STACK_ATOM_BUS_0_03, GND)dnl
-dnl
-define(M5STACK_ATOM_BUS_1_00, 3V3)dnl
-define(M5STACK_ATOM_BUS_1_01, GPIO5)dnl
-define(M5STACK_ATOM_BUS_1_02, GPIO6)dnl
-define(M5STACK_ATOM_BUS_1_03, GPIO7)dnl
-define(M5STACK_ATOM_BUS_1_04, GPIO8)dnl
-dnl
-define(M5STACK_ATOM_DISPLAY_WIDTH, 128)dnl
-define(M5STACK_ATOM_DISPLAY_HEIGHT, 128)dnl
-define(M5STACK_ATOM_DISPLAY_SIZE, M5STACK_ATOM_DISPLAY_WIDTH`'x`'M5STACK_ATOM_DISPLAY_HEIGHT)dnl
 .namespace:
+
+  substitutions: &namespace`'_substitutions
+    namespace:
+      display:
+        width: 128
+        height: 128
+        size: "128x128"
+      gpio:
+        button: GPIO41
+        i2c:
+          scl: GPIO0
+          sda: GPIO45
+        grove:
+          _0: GPIO1
+          _1: GPIO2
+        spi:
+          clk: GPIO15
+          mosi: GPIO21
+        ir: GPIO47
+        display:
+          dc: GPIO42
+          reset: GPIO48
+          cs: GPIO14
+    m5stack_atom_bus:
+      _0:
+        _0: GPIO39
+        _1: GPIO38
+      _1:
+        _1: GPIO5
+        _2: GPIO6
+        _3: GPIO7
+        _4: GPIO8
 
   external_components: 
     - &namespace`'_external_components
@@ -81,7 +80,7 @@ define(M5STACK_ATOM_DISPLAY_SIZE, M5STACK_ATOM_DISPLAY_WIDTH`'x`'M5STACK_ATOM_DI
       platform: gpio
       id: namespace`'_button
       pin:
-        number: indir(NAMESPACE`'_BUTTON)
+        number: ${namespace.gpio.button}
         mode: INPUT_PULLUP
         inverted: true
       internal: true
@@ -90,16 +89,16 @@ define(M5STACK_ATOM_DISPLAY_SIZE, M5STACK_ATOM_DISPLAY_WIDTH`'x`'M5STACK_ATOM_DI
     - &namespace`'_i2c
       id: namespace`'_i2c
       scl:
-        number: indir(NAMESPACE`'_I2C_SCL)
+        number: ${namespace.gpio.i2c.scl}
         ignore_strapping_warning: true
       sda:
-        number: indir(NAMESPACE`'_I2C_SDA)
+        number: ${namespace.gpio.i2c.sda}
         ignore_strapping_warning: true
       scan: true
     - &namespace`'_i2c_grove
       id: namespace`'_i2c_grove
-      scl: indir(NAMESPACE`'_GROVE_0)
-      sda: indir(NAMESPACE`'_GROVE_1)
+      scl: ${namespace.gpio.grove._0}
+      sda: ${namespace.gpio.grove._1}
       scan: true
 
   lp5562: &namespace`'_lp5562
@@ -125,23 +124,22 @@ define(M5STACK_ATOM_DISPLAY_SIZE, M5STACK_ATOM_DISPLAY_WIDTH`'x`'M5STACK_ATOM_DI
   spi: &namespace`'_spi
     id: namespace`'_spi
     interface: spi2
-    clk_pin: indir(NAMESPACE`'_SPI_CLK)
-    mosi_pin: indir(NAMESPACE`'_SPI_MOSI)
+    clk_pin: ${namespace.gpio.spi.clk}
+    mosi_pin: ${namespace.gpio.spi.mosi}
 
   display:
     - &namespace`'_display
       platform: mipi_spi
       model: ST7789V
-      dc_pin: indir(NAMESPACE`'_DISPLAY_DC)
-      reset_pin: indir(NAMESPACE`'_DISPLAY_RESET)
-      cs_pin: indir(NAMESPACE`'_DISPLAY_CS)
+      dc_pin: ${namespace.gpio.display.dc}
+      reset_pin: ${namespace.gpio.display.reset}
+      cs_pin: ${namespace.gpio.display.cs}
       data_rate: 40MHz
       dimensions:
-        width: M5STACK_ATOM_DISPLAY_WIDTH
-        height: M5STACK_ATOM_DISPLAY_HEIGHT
+        width: ${namespace.display.width}
+        height: ${namespace.display.height}
         offset_height: 1
         offset_width: 2
       invert_colors: true
 
 undefine(`namespace')dnl
-undefine(`NAMESPACE')dnl
