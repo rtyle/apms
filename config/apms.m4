@@ -21,53 +21,13 @@ dnl   -DSMTP=value
 dnl     Value is the name of the file that declares the smtp_ component
 ifdef(`SMTP', `', `define(`SMTP', `smtp.m4')')dnl
 dnl
-dnl   -DPRESSURE_RAW_PSI_0=value
-dnl     tem3200 raw_pressure value that maps to 0 psi
-ifdef(`PRESSURE_RAW_PSI_0', `', `define(`PRESSURE_RAW_PSI_0', 1000)')dnl
-dnl
-dnl   -DPRESSURE_RAW_PSI_100=value
-dnl     tem3200 raw_pressure value that maps to 100 psi
-ifdef(`PRESSURE_RAW_PSI_100', `', `define(`PRESSURE_RAW_PSI_100', 15000)')dnl
-dnl
 dnl   -DPRESSURE_UNIT=value
 dnl     Unit value (psi or mbar) for pressure
 ifdef(`PRESSURE_UNIT', `define(`PRESSURE_UNIT', translit(PRESSURE_UNIT, `A-Z', `a-z'))', `define(`PRESSURE_UNIT', `psi')')dnl
 dnl
-dnl   -DPRESSURE_PSI_PRECISION=value
-dnl     Number of digits after the decimal point for pressure in units of psi
-ifdef(`PRESSURE_PSI_PRECISION', `', `define(`PRESSURE_PSI_PRECISION', 3)')dnl
-dnl
-dnl   -DPRESSURE_PSI_THRESHOLD=value
-dnl     Pressure at or over threshold value is alarming in units of psi
-ifdef(`PRESSURE_PSI_THRESHOLD', `', `define(`PRESSURE_PSI_THRESHOLD', 80)')dnl
-dnl
-dnl   -DPRESSURE_MBAR_PRECISION=value
-dnl     Number of digits after the decimal point for pressure in units of mbar
-ifdef(`PRESSURE_MBAR_PRECISION', `', `define(`PRESSURE_MBAR_PRECISION', 1)')dnl
-dnl
-dnl   -DPRESSURE_MBAR_THRESHOLD=value
-dnl     Pressure at or over threshold value is alarming in units of mbar
-ifdef(`PRESSURE_MBAR_THRESHOLD', `', `define(`PRESSURE_MBAR_THRESHOLD', 5500)')dnl
-dnl
-dnl   -DPRESSURE_MBAR_BAROMETRIC=value
-dnl     Nominal barometric pressure at installation point
-ifdef(`PRESSURE_MBAR_BAROMETRIC', `', `define(`PRESSURE_MBAR_BAROMETRIC', 1013.25)')dnl
-dnl
 dnl   -DTEMPERATURE_UNIT=value
 dnl     Unit value (fahrenheit or celsius) for temperature
 ifdef(`TEMPERATURE_UNIT', `define(`TEMPERATURE_UNIT', translit(TEMPERATURE_UNIT, `A-Z', `a-z'))', `define(`TEMPERATURE_UNIT', `fahrenheit')')dnl
-dnl
-dnl   -DTEMPERATURE_FAHRENHEIT_PRECISION=value
-dnl     Number of digits after the decimal point for temperature in units of degrees fahrenheit
-ifdef(`TEMPERATURE_FAHRENHEIT_PRECISION', `', `define(`TEMPERATURE_FAHRENHEIT_PRECISION', 1)')dnl
-dnl
-dnl   -DTEMPERATURE_CELSIUS_PRECISION=value
-dnl     Number of digits after the decimal point for temperature in units of degrees celsius
-ifdef(`TEMPERATURE_CELSIUS_PRECISION', `', `define(`TEMPERATURE_CELSIUS_PRECISION', 1)')dnl
-dnl
-dnl   -DMOLAR_DENSITY_PRECISION=value
-dnl     Number of digits after the decimal point for molar density in units of mol/m³
-ifdef(`MOLAR_DENSITY_PRECISION', `', `define(`MOLAR_DENSITY_PRECISION', 1)')dnl
 dnl
 define(`_pressure_state', `id(pressure_'PRESSURE_UNIT`_).state')dnl
 dnl
@@ -75,46 +35,87 @@ dnl
 
 include(m5stack_atoms3r.m4)dnl
 include(m5stack_atomic_poe_base.m4)dnl
+# only top level substitutions can be overridden on the esphome command line
 substitutions:
   <<: *m5stack_atoms3r_substitutions
-  name: "NAME"
-  logger_level: "INFO"
+  name: NAME
+  logger_level: INFO
   update_interval: 60
+
+  pressure_raw_psi_0: 1000
+  pressure_raw_psi_100: 15000
+
+  pressure_unit: PRESSURE_UNIT
+
+  pressure_psi_precision: 3
+  pressure_psi_minimum: 0
+  pressure_psi_maximum: 100
+  pressure_psi_threshold: 80
+
+  pressure_mbar_precision: 1
+  pressure_mbar_minimum: 0
+  pressure_mbar_maximum: 7000
+  pressure_mbar_threshold: 5500
+  pressure_mbar_barometric: 1013.25
+
+  pressure_precision: ${pressure[pressure.unit].precision}
+  pressure_minimum: ${pressure[pressure.unit].minimum}
+  pressure_maximum: ${pressure[pressure.unit].maximum}
+  pressure_threshold: ${pressure[pressure.unit].threshold}
+
+  pressure_format: "%.${pressure_precision}f"
+
+  temperature_unit: TEMPERATURE_UNIT
+
+  temperature_fahrenheit_precision: 1
+  temperature_fahrenheit_minimum: 0
+  temperature_fahrenheit_maximum: 120
+
+  temperature_celsius_precision: 1
+  temperature_celsius_minimum: -20
+  temperature_celsius_maximum: 50
+
+  temperature_precision: ${temperature[temperature.unit].precision}
+  temperature_minimum: ${temperature[temperature.unit].minimum}
+  temperature_maximum: ${temperature[temperature.unit].maximum}
+
+  temperature_format: "%.${temperature_precision}f"
+
+  molar_density_precision: 1
+  molar_density_minimum: 0
+  molar_density_maximum: 400
+
   pressure:
     raw:
-      psi_0: PRESSURE_RAW_PSI_0
-      psi_100: PRESSURE_RAW_PSI_100
-    unit: "PRESSURE_UNIT"
+      psi_0: ${pressure_raw_psi_0}
+      psi_100: ${pressure_raw_psi_100}
+    unit: ${pressure_unit}
     psi:
-      precision: PRESSURE_PSI_PRECISION
-      format: "`%.'PRESSURE_PSI_PRECISION`f'"
-      minimum: 0
-      maximum: 100
-      threshold: PRESSURE_PSI_THRESHOLD
+      precision: ${pressure_psi_precision}
+      minimum: ${pressure_psi_minimum}
+      maximum: ${pressure_psi_maximum}
+      threshold: ${pressure_psi_threshold}
     mbar:
-      precision: PRESSURE_MBAR_PRECISION
-      format: "`%.'PRESSURE_MBAR_PRECISION`f'"
-      minimum: 0
-      maximum: 7000
-      threshold: PRESSURE_MBAR_THRESHOLD
-      barometric: PRESSURE_MBAR_BAROMETRIC
+      precision: ${pressure_mbar_precision}
+      minimum: ${pressure_mbar_minimum}
+      maximum: ${pressure_mbar_maximum}
+      threshold: ${pressure_mbar_threshold}
+      barometric: ${pressure_mbar_barometric}
   temperature:
-    unit: "TEMPERATURE_UNIT"
+    unit: ${temperature_unit}
     fahrenheit:
-      precision: TEMPERATURE_FAHRENHEIT_PRECISION
-      format: "`%.'TEMPERATURE_FAHRENHEIT_PRECISION`f'"
-      minimum: 0
-      maximum: 120
+      precision: ${temperature_fahrenheit_precision}
+      minimum: ${temperature_fahrenheit_minimum}
+      maximum: ${temperature_fahrenheit_maximum}
     celsius:
-      precision: TEMPERATURE_CELSIUS_PRECISION
-      format: "`%.'TEMPERATURE_CELSIUS_PRECISION`f'"
-      minimum: -20
-      maximum: 50
+      precision: ${temperature_celsius_precision}
+      minimum: ${temperature_celsius_minimum}
+      maximum: ${temperature_celsius_maximum}
   molar_density:
-    precision: MOLAR_DENSITY_PRECISION
-    format: "`%.'MOLAR_DENSITY_PRECISION`f'"
-    minimum: 0
-    maximum: 400
+    precision: ${molar_density_precision}
+    minimum: ${molar_density_minimum}
+    maximum: ${molar_density_maximum}
+    format: "%.${molar_density_precision}f"
   
 external_components:
   - <<: *m5stack_atoms3r_external_components
@@ -137,7 +138,7 @@ ota:
 api:
   reboot_timeout: 0s
   encryption:
-    key: !secret NAME-api-key
+    key: !secret NAME-api-encryption-key
 
 web_server:
   version: 3
@@ -265,10 +266,10 @@ binary_sensor:
 ifdef(`_smtp_defined', `dnl
     on_press:
       smtp_.send:
-        subject: !lambda return str_sprintf("${name} pressure (${pressure[pressure.unit].format} ${pressure.unit}) >= ${pressure[pressure.unit].threshold}", _pressure_state);
+        subject: !lambda return str_sprintf("${name} pressure (${pressure_format} ${pressure.unit}) >= ${pressure_threshold}", _pressure_state);
     on_release:
       smtp_.send:
-        subject: !lambda return str_sprintf("${name} pressure (${pressure[pressure.unit].format} ${pressure.unit}) < ${pressure[pressure.unit].threshold}", _pressure_state);
+        subject: !lambda return str_sprintf("${name} pressure (${pressure_format} ${pressure.unit}) < ${pressure_threshold}", _pressure_state);
 ')dnl
 
   - id: pressure_measurement_alarm_
@@ -279,10 +280,10 @@ ifdef(`_smtp_defined', `dnl
 ifdef(`_smtp_defined', `dnl
     on_press:
       smtp_.send:
-        subject: !lambda return str_sprintf("${name} pressure measurement failure (was ${pressure[pressure.unit].format} ${pressure.unit})", _pressure_state);
+        subject: !lambda return str_sprintf("${name} pressure measurement failure (was ${pressure_format} ${pressure.unit})", _pressure_state);
     on_release:
       smtp_.send:
-        subject: !lambda return str_sprintf("${name} pressure measurement success (now ${pressure[pressure.unit].format} ${pressure.unit})", _pressure_state);
+        subject: !lambda return str_sprintf("${name} pressure measurement success (now ${pressure_format} ${pressure.unit})", _pressure_state);
 ')dnl
 
 display:
@@ -305,7 +306,7 @@ script:
       - delay: ${update_interval +10}s
       - logger.log:
           level: ERROR
-          format: "${name} pressure measurement failure (was ${pressure[pressure.unit].format} ${pressure.unit})"
+          format: "${name} pressure measurement failure (was ${pressure_format} ${pressure.unit})"
           args: [_pressure_state]
       - binary_sensor.template.publish:
           id: pressure_measurement_alarm_
@@ -351,11 +352,11 @@ define(`_pressure_unit_on_value', `dnl
       - script.execute: pressure_measurement_watchdog_
       - if:
           condition:
-            lambda: return x < ${pressure[pressure.unit].threshold};
+            lambda: return x < ${pressure_threshold};
           then:
             - logger.log:
                 level: INFO
-                format: "${name} pressure (${pressure[pressure.unit].format} ${pressure.unit}) < ${pressure[pressure.unit].threshold}"
+                format: "${name} pressure (${pressure_format} ${pressure.unit}) < ${pressure_threshold}"
                 args: [x]
             - binary_sensor.template.publish:
                 id: pressure_threshold_alarm_
@@ -363,19 +364,19 @@ define(`_pressure_unit_on_value', `dnl
           else:
             - logger.log:
                 level: WARN
-                format: "${name} pressure (${pressure[pressure.unit].format} ${pressure.unit}) >= ${pressure[pressure.unit].threshold}"
+                format: "${name} pressure (${pressure_format} ${pressure.unit}) >= ${pressure_threshold}"
                 args: [x]
             - binary_sensor.template.publish:
                 id: pressure_threshold_alarm_
                 state: ON
       - lvgl.indicator.update:
           id: pressure_indicator_
-          value: !lambda return x * ${math.pow(10, pressure[pressure.unit].precision)};
+          value: !lambda return x * ${math.pow(10, pressure_precision)};
       - lvgl.widget.show: pressure_meter_
       - lvgl.label.update:
           id: pressure_label_`'dnl
 ifelse(PRESSURE_UNIT, `psi', `
-          text: !lambda return str_sprintf("${pressure[pressure.unit].format}", x);', `
+          text: !lambda return str_sprintf("${pressure_format}", x);', `
           # pressure meter scale_mbar.png unit is BAR, adjust pressure_label_ text to match
           text: !lambda return str_sprintf("`%.'${pressure.mbar.precision + 3}`f'", x / ${math.pow(10, 3)});')
 ')dnl
@@ -390,11 +391,11 @@ define(`_temperature_unit_on_value', `dnl
     on_value:
       - lvgl.indicator.update:
           id: temperature_indicator_
-          value: !lambda return x * ${math.pow(10, $temperature[temperature.unit].precision)};
+          value: !lambda return x * ${math.pow(10, ${temperature_precision})};
       - lvgl.widget.show: temperature_meter_
       - lvgl.label.update:
           id: temperature_label_
-          text: !lambda return str_sprintf("${temperature[temperature.unit].format}", x);
+          text: !lambda return str_sprintf("${temperature_format}", x);
 ')dnl
 
   - platform: template
@@ -481,7 +482,7 @@ ifelse(TEMPERATURE_UNIT, `fahrenheit', _temperature_unit_on_value)dnl
           args: [x]
       - lvgl.indicator.update:
           id: molar_density_indicator_
-          value: !lambda return x * ${math.pow(10, molar_density.precision)};
+          value: !lambda return x * ${math.pow(10, ${molar_density_precision})};
       - lvgl.widget.show: molar_density_meter_
       - lvgl.label.update:
           id: molar_density_label_
@@ -493,12 +494,12 @@ image:
     type: rgb565
     resize: ${m5stack_atoms3r.display.size}
   - id: pressure_scale_
-    file: scale_`'PRESSURE_UNIT.png
+    file: scale_${pressure.unit}.png
     type: rgb565
     resize: ${m5stack_atoms3r.display.size}
     transparency: alpha_channel
   - id: temperature_scale_
-    file: scale_`'TEMPERATURE_UNIT.png
+    file: scale_${temperature.unit}.png
     type: rgb565
     resize: ${m5stack_atoms3r.display.size}
     transparency: alpha_channel
@@ -531,19 +532,19 @@ lvgl:
                   width: 100%
                   height: 100%
                   scales:
-                    - range_from: ${pressure[pressure.unit].minimum}
-                      range_to: ${pressure[pressure.unit].maximum}
+                    - range_from: ${pressure_minimum}
+                      range_to: ${pressure_maximum}
                       indicators:
                         - arc:
                             color: green
                             width: 8
-                            start_value: ${pressure[pressure.unit].minimum}
-                            end_value: ${pressure[pressure.unit].threshold}
+                            start_value: ${pressure_minimum}
+                            end_value: ${pressure_threshold}
                         - arc:
                             color: red
                             width: 8
-                            start_value: ${pressure[pressure.unit].threshold}
-                            end_value: ${pressure[pressure.unit].maximum}
+                            start_value: ${pressure_threshold}
+                            end_value: ${pressure_maximum}
               - image:
                   src: pressure_scale_
                   align: CENTER
@@ -554,8 +555,8 @@ lvgl:
                   height: 100%
                   hidden: true
                   scales:
-                    - range_from: ${math.pow(10, pressure[pressure.unit].precision) * pressure[pressure.unit].minimum}
-                      range_to: ${math.pow(10, pressure[pressure.unit].precision) * pressure[pressure.unit].maximum}
+                    - range_from: ${math.pow(10, pressure_precision) * pressure_minimum}
+                      range_to: ${math.pow(10, pressure_precision) * pressure_maximum}
                       indicators:
                         - line:
                             id: pressure_indicator_
@@ -585,8 +586,8 @@ lvgl:
                   height: 100%
                   hidden: true
                   scales:
-                    - range_from: ${math.pow(10, temperature[temperature.unit].precision) * temperature[temperature.unit].minimum}
-                      range_to: ${math.pow(10, temperature[temperature.unit].precision) * temperature[temperature.unit].maximum}
+                    - range_from: ${math.pow(10, temperature_precision) * temperature_minimum}
+                      range_to: ${math.pow(10, temperature_precision) * temperature_maximum}
                       indicators:
                         - line:
                             id: temperature_indicator_
