@@ -40,6 +40,8 @@ substitutions:
   logger_level: INFO
   update_interval: 60
 
+  barometric_pressure_mbar: 1013.25
+
   pressure_raw_psi_0: 1000
   pressure_raw_psi_100: 15000
 
@@ -54,7 +56,6 @@ substitutions:
   pressure_mbar_minimum: 0
   pressure_mbar_maximum: 7000
   pressure_mbar_threshold: 5500
-  pressure_mbar_barometric: 1013.25
 
   pressure_precision: ${pressure[pressure.unit].precision}
   pressure_minimum: ${pressure[pressure.unit].minimum}
@@ -84,6 +85,10 @@ substitutions:
   molar_density_minimum: 0
   molar_density_maximum: 400
 
+  barometric:
+    pressure:
+      mbar: ${barometric_pressure_mbar}
+
   pressure:
     raw:
       psi_0: ${pressure_raw_psi_0}
@@ -99,7 +104,6 @@ substitutions:
       minimum: ${pressure_mbar_minimum}
       maximum: ${pressure_mbar_maximum}
       threshold: ${pressure_mbar_threshold}
-      barometric: ${pressure_mbar_barometric}
   temperature:
     unit: ${temperature_unit}
     fahrenheit:
@@ -327,10 +331,20 @@ sensor:
     cpu_frequency:
       name: debug cpu_frequency
 
+  - platform: template
+    id: updater_
+    internal: true
+    update_interval: ${update_interval}s
+    lambda: |-
+      id(tem3200_).update();
+      id(qmp6988_).update();
+      id(molar_density_).update();
+      return {};
+
   - platform: tem3200
     id: tem3200_
     i2c_id: m5stack_atoms3r_i2c_grove
-    update_interval: "${update_interval}s"
+    update_interval: never
 
     raw_pressure:
       id: pressure_
@@ -338,11 +352,6 @@ sensor:
       on_value:
         - component.update: pressure_psi_
         - component.update: pressure_mbar_
-        # TEM3200Component::update calls, in order
-        #   1. this-temperature_sensor_->publish_state(temperature);
-        #   2. this->raw_pressure_sensor_->publish_state(raw_pressure);
-        # now (2) we can update density from raw_pressure and temperature
-        - component.update: molar_density_
 define(`_pressure_unit_on_value', `dnl
     on_value:
       - binary_sensor.template.publish:
@@ -457,6 +466,28 @@ ifelse(TEMPERATURE_UNIT, `celsius', _temperature_unit_on_value)dnl
           - 100 -> 212
 ifelse(TEMPERATURE_UNIT, `fahrenheit', _temperature_unit_on_value)dnl
 
+  - platform: qmp6988
+    id: qmp6988_
+    i2c_id: m5stack_atoms3r_i2c_grove
+    update_interval: never
+    pressure:
+      id: barometric_pressure_
+      internal: true
+      # unit_of_measurement: hPa
+      on_value:
+        component.update: barometric_pressure_mbar_
+
+  - platform: template
+    id: barometric_pressure_mbar_
+    name: barometric pressure mbar
+    update_interval: never
+    unit_of_measurement: mbar
+    state_class: measurement
+    device_class: pressure
+    accuracy_decimals: ${pressure.mbar.precision}
+    lambda: |-
+      return id(barometric_pressure_).state;
+
   - platform: template
     id: molar_density_
     name: molar density
@@ -473,7 +504,7 @@ ifelse(TEMPERATURE_UNIT, `fahrenheit', _temperature_unit_on_value)dnl
     # R in kg·m²/(s²·mol·K) (constant = 8.31446)
     # T in kelvin (273.15 K = 0 °C)
     lambda: |-
-      return (100.0f * (id(pressure_mbar_).state + ${pressure.mbar.barometric})) / (8.31446f * (id(temperature_).state + 273.15f));
+      return (100.0f * (id(pressure_mbar_).state + ${barometric.pressure.mbar})) / (8.31446f * (id(temperature_).state + 273.15f));
     on_value:
       - logger.log:
           level: INFO
