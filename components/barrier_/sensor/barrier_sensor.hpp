@@ -16,11 +16,8 @@ static constexpr auto TAG{"barrier_"};
 
 // TemplateSensor is final so we can't inherit from it
 // but we can mirror it
-template<std::size_t expected>
-class BarrierTemplateSensor : public sensor::Sensor, public PollingComponent {
-
+template<std::size_t expected> class BarrierTemplateSensor : public sensor::Sensor, public PollingComponent {
  public:
-
   // mirror TemplateSensor method
   template<typename F> void set_template(F &&f) { this->f_.set(std::forward<F>(f)); }
 
@@ -47,7 +44,7 @@ class BarrierTemplateSensor : public sensor::Sensor, public PollingComponent {
 
   // called by contributors when they arrive at the barrier
   // ordinal is the contributor's index (0-based)
-  //value is the value to contribute to the barrier
+  // value is the value to contribute to the barrier
   void arrive(std::size_t ordinal, float value) {
     if (ordinal >= expected) {
       ESP_LOGE(TAG, "arrive(%zu, %.3f): ordinal out of range (expected < %zu)", ordinal, value, expected);
