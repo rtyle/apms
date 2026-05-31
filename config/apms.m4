@@ -40,14 +40,16 @@ substitutions:
   logger_level: INFO
   update_interval: 60
 
-  barometric_pressure_mbar: 1013.25
+  mbar_per_psi: 68.94757
+  barometric_pressure_psi: 14.696
+  barometric_pressure_mbar: ${mbar_per_psi * barometric_pressure_psi}
 
   pressure_raw_psi_0: 1000
   pressure_raw_psi_100: 15000
 
   pressure_unit: PRESSURE_UNIT
 
-  pressure_psi_precision: 3
+  pressure_psi_precision: 4
   pressure_psi_minimum: 0
   pressure_psi_maximum: 100
   pressure_psi_threshold: 80
@@ -63,6 +65,8 @@ substitutions:
   pressure_threshold: ${pressure[pressure.unit].threshold}
 
   pressure_format: "%.${pressure_precision}f"
+
+  barometric_pressure_state: id(barometric_pressure_${pressure.unit}_).state
   pressure_state: id(pressure_${pressure.unit}_).state
 
   temperature_unit: TEMPERATURE_UNIT
@@ -85,9 +89,9 @@ substitutions:
   molar_density_minimum: 0
   molar_density_maximum: 400
 
-  barometric:
-    pressure:
-      mbar: ${barometric_pressure_mbar}
+  barometric_pressure:
+    psi: ${barometric_pressure_psi}
+    mbar: ${barometric_pressure_mbar}
 
   pressure:
     raw:
@@ -162,7 +166,8 @@ esphome:
   <<: *m5stack_atoms3r_esphome
   name: ${name}
   on_boot:
-    script.execute: pressure_measurement_watchdog_
+    - script.execute: pressure_measurement_watchdog_
+    - script.execute: barometric_pressure_measurement_watchdog_
 
 esp32:
   <<: *m5stack_atoms3r_esp32
@@ -289,6 +294,20 @@ ifdef(`_smtp_defined', `dnl
         subject: !lambda return str_sprintf("${name} pressure measurement success (now ${pressure_format} ${pressure.unit})", ${pressure_state});
 ')dnl
 
+  - id: barometric_pressure_measurement_alarm_
+    name: barometric pressure measurement alarm
+    platform: template
+    device_class: problem
+    trigger_on_initial_state: true
+ifdef(`_smtp_defined', `dnl
+    on_press:
+      smtp_.send:
+        subject: !lambda return str_sprintf("${name} barometric pressure measurement failure (was ${pressure_format} ${pressure.unit})", ${barometric_pressure_state});
+    on_release:
+      smtp_.send:
+        subject: !lambda return str_sprintf("${name} barometric pressure measurement success (now ${pressure_format} ${pressure.unit})", ${barometric_pressure_state});
+')dnl
+
 display:
   - <<: *m5stack_atoms3r_display
     id: display_
@@ -318,6 +337,19 @@ script:
       - lvgl.widget.hide: temperature_meter_
       - lvgl.widget.hide: molar_density_meter_
 
+  - id: barometric_pressure_measurement_watchdog_
+    mode: restart
+    then:
+      - delay: ${update_interval +10}s
+      - logger.log:
+          level: ERROR
+          format: "${name} barometric pressure measurement failure (was ${pressure_format} ${pressure.unit})"
+          args: ["${barometric_pressure_state}"]
+      - binary_sensor.template.publish:
+          id: barometric_pressure_measurement_alarm_
+          state: ON
+      - lvgl.widget.hide: molar_density_meter_
+
 sensor:
   - platform: debug
     free:
@@ -336,9 +368,8 @@ sensor:
     internal: true
     update_interval: ${update_interval}s
     lambda: |-
-      id(tem3200_).update();
-      id(qmp6988_).update();
-      id(molar_density_).update();
+      id(qmp6988_).update();  // will always update temperature then pressure (with 0's on failure)
+      id(tem3200_).update();  // will only update on success (temperature then raw_pressure)
       return {};
 
   - platform: tem3200
@@ -352,12 +383,11 @@ sensor:
       on_value:
         - component.update: pressure_psi_
         - component.update: pressure_mbar_
+        - binary_sensor.template.publish:
+            id: pressure_measurement_alarm_
+            state: OFF
+        - script.execute: pressure_measurement_watchdog_
 define(`_pressure_unit_on_value', `dnl
-    on_value:
-      - binary_sensor.template.publish:
-          id: pressure_measurement_alarm_
-          state: OFF
-      - script.execute: pressure_measurement_watchdog_
       - if:
           condition:
             lambda: return x < ${pressure_threshold};
@@ -383,10 +413,6 @@ define(`_pressure_unit_on_value', `dnl
       - lvgl.widget.show: pressure_meter_
       - lvgl.label.update:
           id: pressure_label_`'dnl
-ifelse(PRESSURE_UNIT, `psi', `
-          text: !lambda return str_sprintf("${pressure_format}", x);', `
-          # pressure meter scale_mbar.png unit is BAR, adjust pressure_label_ text to match
-          text: !lambda return str_sprintf("`%.'${pressure.mbar.precision + 3}`f'", x / ${math.pow(10, 3)});')
 ')dnl
 
     temperature:
@@ -420,7 +446,11 @@ define(`_temperature_unit_on_value', `dnl
       - calibrate_linear:
           - ${pressure.raw.psi_0} -> 0
           - ${pressure.raw.psi_100} -> 100
-ifelse(PRESSURE_UNIT, `psi', _pressure_unit_on_value)dnl
+ifelse(PRESSURE_UNIT, `psi', `dnl
+    on_value:
+_pressure_unit_on_value
+          text: !lambda return str_sprintf("${pressure_format}", x);
+')dnl
 
   - platform: template
     id: pressure_mbar_
@@ -435,8 +465,13 @@ ifelse(PRESSURE_UNIT, `psi', _pressure_unit_on_value)dnl
     filters:
       - calibrate_linear:
           - ${pressure.raw.psi_0} -> 0
-          - ${pressure.raw.psi_100} -> 6894.76
-ifelse(PRESSURE_UNIT, `mbar', _pressure_unit_on_value)dnl
+          - ${pressure.raw.psi_100} -> ${100 * mbar_per_psi}
+    on_value:
+      - component.update: molar_density_
+ifelse(PRESSURE_UNIT, `mbar', `dnl
+_pressure_unit_on_value
+          text: !lambda return str_sprintf("`%.'${pressure.mbar.precision + 3}`f'", x / ${math.pow(10, 3)});
+')dnl
 
   - platform: template
     id: temperature_celsius_
@@ -475,7 +510,27 @@ ifelse(TEMPERATURE_UNIT, `fahrenheit', _temperature_unit_on_value)dnl
       internal: true
       # unit_of_measurement: hPa
       on_value:
-        component.update: barometric_pressure_mbar_
+        if:
+          condition:
+            lambda: return !(std::isnan(x) || 0.0f == x);
+          then:
+            - component.update: barometric_pressure_psi_
+            - component.update: barometric_pressure_mbar_
+            - binary_sensor.template.publish:
+                id: barometric_pressure_measurement_alarm_
+                state: OFF
+            - script.execute: barometric_pressure_measurement_watchdog_
+
+  - platform: template
+    id: barometric_pressure_psi_
+    name: barometric pressure psi
+    update_interval: never
+    unit_of_measurement: psi
+    state_class: measurement
+    device_class: pressure
+    accuracy_decimals: ${pressure.mbar.precision}
+    lambda: |-
+      return id(barometric_pressure_).state / ${mbar_per_psi};
 
   - platform: template
     id: barometric_pressure_mbar_
@@ -486,7 +541,7 @@ ifelse(TEMPERATURE_UNIT, `fahrenheit', _temperature_unit_on_value)dnl
     device_class: pressure
     accuracy_decimals: ${pressure.mbar.precision}
     lambda: |-
-      return id(barometric_pressure_).state;
+      return id(barometric_pressure_).state;  // 1 hPa = 1 mbar
 
   - platform: template
     id: molar_density_
@@ -497,14 +552,23 @@ ifelse(TEMPERATURE_UNIT, `fahrenheit', _temperature_unit_on_value)dnl
     device_class: ""
     accuracy_decimals: ${molar_density.precision}
     # PV = nRT ⇒ n/V (molar density) = P/(R·T)
-    # P is absolute pressure (TE M3200 gauge pressure + barometric pressure)
+    # P is absolute pressure (gauge pressure + barometric pressure)
     # P in Pa = kg/(m·s²) (1 = 100 Pa/mbar)
     # V in m³
     # n in mol
     # R in kg·m²/(s²·mol·K) (constant = 8.31446)
     # T in kelvin (273.15 K = 0 °C)
     lambda: |-
-      return (100.0f * (id(pressure_mbar_).state + ${barometric.pressure.mbar})) / (8.31446f * (id(temperature_).state + 273.15f));
+      static auto constexpr nbp{${barometric_pressure.mbar}f};
+      static auto constexpr pascal_per_mbar{100.0f};
+      static auto constexpr kelvin_offset_celsius{273.15f};
+      static auto constexpr R{8.31446f};
+      auto const gp{id(pressure_mbar_).state};
+      auto const bp{id(barometric_pressure_mbar_).has_state() ? id(barometric_pressure_mbar_).state : nbp};
+      auto const P{pascal_per_mbar * (gp + bp)};
+      auto const t{id(temperature_).state};
+      auto const T{kelvin_offset_celsius + t};
+      return P / (R * T);	// = n / V
     on_value:
       - logger.log:
           level: INFO
@@ -512,7 +576,7 @@ ifelse(TEMPERATURE_UNIT, `fahrenheit', _temperature_unit_on_value)dnl
           args: [x]
       - lvgl.indicator.update:
           id: molar_density_indicator_
-          value: !lambda return x * ${math.pow(10, ${molar_density_precision})};
+          value: !lambda return x * ${math.pow(10, molar_density.precision)};
       - lvgl.widget.show: molar_density_meter_
       - lvgl.label.update:
           id: molar_density_label_
