@@ -34,7 +34,7 @@ template<std::size_t expected> class BarrierTemplateSensor : public sensor::Sens
   // mirror TemplateSensor method
   // and log expected value
   void dump_config() override {
-    LOG_SENSOR("", "BarrierTemplate Sensor", this);
+    LOG_SENSOR("", "BarrierTemplateSensor", this);
     LOG_UPDATE_INTERVAL(this);
     ESP_LOGCONFIG(TAG, "  Expected: %zu", expected);
   }
