@@ -52,9 +52,9 @@ template<std::size_t size> class CompositionSensor : public sensor::Sensor, publ
     if (count == size) {
       if (!this->f_.has_value())
         return;
-      auto val = this->f_();
-      if (val.has_value()) {
-        this->publish_state(*val);
+      auto state = this->f_();
+      if (state.has_value()) {
+        this->publish_state(*state);
       }
     }
   }
