@@ -129,7 +129,7 @@ external_components:
   - source:
       type: local
       path: ../components
-    components: [barrier_]
+    components: [composition_]
 define(`_smtp_define', `define(`_smtp_defined')dnl
   - source: github://rtyle/ping4pow@master
     components: [asio_, smtp_]
@@ -456,7 +456,7 @@ _pressure_unit_on_value
           - ${pressure.raw.psi_0} -> 0
           - ${pressure.raw.psi_100} -> ${100 * mbar_per_psi}
     on_value:
-      - lambda: id(molar_density_barrier_).arrive(0, x);
+      - lambda: id(molar_density_).curry(id(pressure_mbar_));
 ifelse(PRESSURE_UNIT, `mbar', `dnl
 _pressure_unit_on_value
           text: !lambda return str_sprintf("`%.'${pressure.mbar.precision + 3}`f'", x / ${math.pow(10, 3)});
@@ -473,7 +473,7 @@ _pressure_unit_on_value
     lambda: |-
       return id(temperature_).state;
     on_value:
-      - lambda: id(molar_density_barrier_).arrive(1, x);
+      - lambda: id(molar_density_).curry(id(temperature_celsius_));
 ifelse(TEMPERATURE_UNIT, `celsius', `dnl
 _temperature_unit_on_value
 ')dnl
@@ -509,10 +509,10 @@ _temperature_unit_on_value
         lambda: |-
           if (0.0f == x) {  // published as such on failure
             id(barometric_pressure_measurement_alarm_).publish_state(true);
-            id(molar_density_barrier_).arrive(2, ${barometric_pressure.mbar});
+            id(molar_density_).curry(id(barometric_pressure_), ${barometric_pressure.mbar});
             return {};
           }
-          id(molar_density_barrier_).arrive(2, x);
+          id(molar_density_).curry(id(barometric_pressure_), x);
           return x;
       on_value:
         - binary_sensor.template.publish:
@@ -543,14 +543,17 @@ _temperature_unit_on_value
     lambda: |-
       return id(barometric_pressure_).state;  // 1 hPa = 1 mbar
 
-  - platform: barrier_
-    id: molar_density_barrier_
+  - platform: composition_
+    id: molar_density_
     name: molar density
     unit_of_measurement: mol/m³
     state_class: measurement
     device_class: ""
     accuracy_decimals: ${molar_density.precision}
-    expected: 3
+    sensors:
+      - pressure_mbar_
+      - temperature_celsius_
+      - barometric_pressure_
     lambda: |-
       // PV = nRT ⇒ n/V = P/(R·T)
       // P is absolute pressure (gauge + barometric) in Pa = kg/(m·s²) (1 mbar = 100 Pa)
@@ -561,7 +564,7 @@ _temperature_unit_on_value
       static auto constexpr pascal_per_mbar{100.0f};
       static auto constexpr kelvin_offset_celsius{273.15f};
       static auto constexpr R{8.31446f};
-      auto [gp, t, bp] = id(molar_density_barrier_).join();
+      auto [gp, t, bp] = id(molar_density_).consume();
       auto const P{pascal_per_mbar * (*gp + *bp)};
       auto const T{kelvin_offset_celsius + *t};
       return P / (R * T);	// = n / V
