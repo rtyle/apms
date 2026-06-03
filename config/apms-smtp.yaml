@@ -1,0 +1,29 @@
+asio_: 
+
+packages:
+  smtp: !include smtp.yaml
+
+binary_sensor:
+  - id: !extend ${pressure.threshold_alarm}
+    on_press:
+      smtp_.send:
+        subject: !lambda return str_sprintf("${name} pressure (${pressure_format} ${pressure.unit}) >= ${pressure_threshold}", ${pressure_state});
+    on_release:
+      smtp_.send:
+        subject: !lambda return str_sprintf("${name} pressure (${pressure_format} ${pressure.unit}) < ${pressure_threshold}", ${pressure_state});
+
+  - id: !extend ${pressure.measurement_alarm}
+    on_press:
+      smtp_.send:
+        subject: !lambda return str_sprintf("${name} pressure measurement failure (was ${pressure_format} ${pressure.unit})", ${pressure_state});
+    on_release:
+      smtp_.send:
+        subject: !lambda return str_sprintf("${name} pressure measurement success (now ${pressure_format} ${pressure.unit})", ${pressure_state});
+
+  - id: !extend ${barometric_pressure.measurement_alarm}
+    on_press:
+      smtp_.send:
+        subject: !lambda return str_sprintf("${name} barometric pressure measurement failure (was ${pressure_format} ${pressure.unit})", ${barometric_pressure_state});
+    on_release:
+      smtp_.send:
+        subject: !lambda return str_sprintf("${name} barometric pressure measurement success (now ${pressure_format} ${pressure.unit})", ${barometric_pressure_state});

@@ -1,0 +1,26 @@
+---
+
+substitutions:
+  name: apms
+  logger_level: INFO
+
+packages:
+  - !include m5stack_atoms3r.yaml
+  - !include
+    file: m5stack_atomic_poe_base.yaml
+    vars:
+      interface: spi3
+      clk_pin: ${m5stack_atom_bus._1._1}
+      cs_pin: ${m5stack_atom_bus._1._2}
+      miso_pin: ${m5stack_atom_bus._1._3}
+      mosi_pin: ${m5stack_atom_bus._1._4}
+  - !include
+    file: apms.yaml
+    vars:
+      i2c: ${m5stack_atoms3r.id.i2c_grove}
+      light: ${m5stack_atoms3r.id.light}
+      display: ${m5stack_atoms3r.id.display}
+      button: ${m5stack_atoms3r.id.button}
+
+logger:
+  level: ${logger_level}
