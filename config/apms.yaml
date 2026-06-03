@@ -25,6 +25,7 @@ substitutions:
   pressure_minimum: ${pressure[pressure.unit].minimum}
   pressure_maximum: ${pressure[pressure.unit].maximum}
   pressure_threshold: ${pressure[pressure.unit].threshold}
+  pressure_text: ${pressure[pressure.unit].text}
 
   pressure_format: "%.${pressure_precision}f"
 
@@ -52,17 +53,7 @@ substitutions:
         id: pressure_indicator_
         value: !lambda return x * ${math.pow(10, pressure_precision)};
     - lvgl.widget.show: pressure_meter_
-    - if:
-        condition:
-          lambda: return "${pressure.unit}" == "psi";
-        then:
-          lvgl.label.update:
-            id: pressure_label_
-            text: !lambda return str_sprintf("${pressure_format}", x);
-        else:
-        - lvgl.label.update:
-            id: pressure_label_
-            text: !lambda return str_sprintf("%.${pressure.mbar.precision + 3}f", x / ${math.pow(10, 3)});
+    - component.update: ${pressure_text}
 
   barometric_pressure_state: id(barometric_pressure_${pressure.unit}_).state
   pressure_state: id(pressure_${pressure.unit}_).state
@@ -113,11 +104,13 @@ substitutions:
       minimum: ${pressure_psi_minimum}
       maximum: ${pressure_psi_maximum}
       threshold: ${pressure_psi_threshold}
+      text: pressure_psi_text_
     mbar:
       precision: ${pressure_mbar_precision}
       minimum: ${pressure_mbar_minimum}
       maximum: ${pressure_mbar_maximum}
       threshold: ${pressure_mbar_threshold}
+      text: pressure_bar_text_
   temperature:
     unit: ${temperature_unit}
     fahrenheit:
@@ -207,6 +200,26 @@ text_sensor:
       name: debug device
     reset_reason:
       name: debug reset_reason
+
+  - platform: template
+    id: pressure_psi_text_
+    internal: true
+    update_interval: never
+    lambda: return str_sprintf("${pressure_format}", ${pressure_state});
+    on_value:
+      lvgl.label.update:
+        id: pressure_label_
+        text: !lambda return x;
+
+  - platform: template
+    id: pressure_bar_text_
+    internal: true
+    update_interval: never
+    lambda: return str_sprintf("%.${pressure.mbar.precision + 3}f", ${pressure_state} / ${math.pow(10, 3)});
+    on_value:
+      lvgl.label.update:
+        id: pressure_label_
+        text: !lambda return x;
 
 script:
   - id: pressure_measurement_watchdog_
