@@ -144,7 +144,7 @@ external_components:
     components: [composition_]
 
 packages:
-  smtp: ${apms_smtp if smtp else {}}
+  - ${apms_smtp if smtp else {}}
 
 ota:
   - platform: esphome

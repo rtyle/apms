@@ -5,7 +5,7 @@ external_components:
 asio_: 
 
 packages:
-  smtp: !include smtp.yaml
+  - !include smtp.yaml
 
 binary_sensor:
   - id: !extend ${pressure.threshold_alarm}
