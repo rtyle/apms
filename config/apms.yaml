@@ -142,8 +142,6 @@ external_components:
       type: local
       path: ../components
     components: [composition_]
-  - source: github://rtyle/ping4pow@master
-    components: [asio_, smtp_]
 
 packages:
   smtp: ${apms_smtp if smtp else {}}
