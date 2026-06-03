@@ -148,26 +148,36 @@ With your virtual environment activated, install ESPHome using pip:
 
     pip install esphome
 
-Optionally, configure (smtp) email notification.
+Configure (smtp) email notification.
 
-    cp config/smtp{.example,}.m4; vi config/smtp.m4
+    cp config/smtp{.example,}.yaml; vi config/smtp.yaml
 
 Configure secrets.yaml.
 
     cp config/secrets{.example,}.yaml; vi config/secrets.yaml
 
-
 These secrets will be protected by flash encryption on/by the device.
 
-Create an ESPHome configuration.
+Test the ESPHome configuration.
 
-    (cd config; m4 apms.m4 > apms.yaml)
+    esphome config config/main.yaml
+
+Substitutions can be made on the esphome command line to override the defaults.
+For example,
+
+    esphome \
+        -s name apms-tank\
+        -s smtp false\
+        -s pressure_unit mbar\
+        -s temperature_unit celsius\
+        -s logger_level DEBUG\
+        config main.yaml
 
 The first firmware flash of this ESPHome configuration
 must be done with a USB cable between your computer and the M5Stack CoreS3.
 **Do not interrupt this first boot!**
 
-    esphome run config/apms.yaml
+    esphome run config/main.yaml
 
 Upon the first boot after the first flash,
 the secondary boot loader will encrypt the content of the flash in place.
