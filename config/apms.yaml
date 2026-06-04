@@ -39,7 +39,7 @@ substitutions:
               format: "${name} pressure (${pressure_format} ${pressure.unit}) < ${pressure_threshold}"
               args: [x]
           - binary_sensor.template.publish:
-              id: pressure_threshold_alarm_
+              id: ${pressure.threshold_alarm}
               state: OFF
         else:
           - logger.log:
@@ -47,7 +47,7 @@ substitutions:
               format: "${name} pressure (${pressure_format} ${pressure.unit}) >= ${pressure_threshold}"
               args: [x]
           - binary_sensor.template.publish:
-              id: pressure_threshold_alarm_
+              id: ${pressure.threshold_alarm}
               state: ON
     - lvgl.indicator.update:
         id: pressure_indicator_
@@ -167,6 +167,7 @@ esphome:
   name: ${name}
   on_boot:
     - script.execute: pressure_measurement_watchdog_
+    - script.execute: barometric_pressure_measurement_watchdog_
 
 esp32:
   framework:
@@ -231,11 +232,31 @@ script:
           format: "${name} pressure measurement failure (was ${pressure_format} ${pressure.unit})"
           args: ["${pressure_state}"]
       - binary_sensor.template.publish:
-          id: pressure_measurement_alarm_
+          id: ${pressure.measurement_alarm}
           state: ON
       - lvgl.widget.hide: pressure_meter_
       - lvgl.widget.hide: temperature_meter_
       - lvgl.widget.hide: molar_density_meter_
+
+  - id: barometric_pressure_measurement_watchdog_
+    mode: restart
+    then:
+      - delay: ${update_interval + 10}s
+      - logger.log:
+          level: ERROR
+          format: "${name} barometric pressure measurement failure (was ${pressure_format} ${pressure.unit})"
+          args: ["${barometric_pressure_state}"]
+      - binary_sensor.template.publish:
+          id: ${barometric_pressure.measurement_alarm}
+          state: ON
+      - lambda: id(molar_density_).curry(id(barometric_pressure_), ${barometric_pressure.mbar});
+      - delay: ${update_interval - 10}s
+      - while:
+          condition:
+            binary_sensor.is_on: ${barometric_pressure.measurement_alarm}
+          then:
+            - lambda: id(molar_density_).curry(id(barometric_pressure_), ${barometric_pressure.mbar});
+            - delay: ${update_interval}s
 
 binary_sensor:
   - id: !extend ${button}
@@ -348,7 +369,7 @@ sensor:
         - component.update: pressure_psi_
         - component.update: pressure_mbar_
         - binary_sensor.template.publish:
-            id: pressure_measurement_alarm_
+            id: ${pressure.measurement_alarm}
             state: OFF
         - script.execute: pressure_measurement_watchdog_
 
@@ -430,21 +451,14 @@ sensor:
       id: barometric_pressure_
       internal: true
       # unit_of_measurement: hPa
-      filters:
-        lambda: |-
-          if (0.0f == x) {  // published as such on failure
-            id(barometric_pressure_measurement_alarm_).publish_state(true);
-            id(molar_density_).curry(id(barometric_pressure_), ${barometric_pressure.mbar});
-            return {};
-          }
-          id(molar_density_).curry(id(barometric_pressure_), x);
-          return x;
       on_value:
         - binary_sensor.template.publish:
-            id: barometric_pressure_measurement_alarm_
+            id: ${barometric_pressure.measurement_alarm}
             state: OFF
+        - script.execute: barometric_pressure_measurement_watchdog_
         - component.update: barometric_pressure_psi_
         - component.update: barometric_pressure_mbar_
+        - lambda: id(molar_density_).curry(id(barometric_pressure_));
 
   - id: barometric_pressure_psi_
     platform: template
