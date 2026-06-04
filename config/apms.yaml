@@ -134,7 +134,7 @@ external_components:
   - source:
       type: local
       path: ../components
-    components: [composition_]
+    components: [composition_, qmp6988]
 
 packages:
   - ${apms_smtp if smtp else {}}
