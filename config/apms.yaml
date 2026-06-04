@@ -201,8 +201,8 @@ text_sensor:
     reset_reason:
       name: debug reset_reason
 
-  - platform: template
-    id: pressure_psi_text_
+  - id: pressure_psi_text_
+    platform: template
     internal: true
     update_interval: never
     lambda: return str_sprintf("${pressure_format}", ${pressure_state});
@@ -211,8 +211,8 @@ text_sensor:
         id: pressure_label_
         text: !lambda return x;
 
-  - platform: template
-    id: pressure_bar_text_
+  - id: pressure_bar_text_
+    platform: template
     internal: true
     update_interval: never
     lambda: return str_sprintf("%.${pressure.mbar.precision + 3}f", ${pressure_state} / ${math.pow(10, 3)});
@@ -327,8 +327,8 @@ sensor:
     cpu_frequency:
       name: debug cpu_frequency
 
-  - platform: template
-    id: updater_
+  - id: updater_
+    platform: template
     internal: true
     update_interval: ${update_interval}s
     lambda: |-
@@ -336,8 +336,8 @@ sensor:
       id(tem3200_).update();
       return {};
 
-  - platform: tem3200
-    id: tem3200_
+  - id: tem3200_
+    platform: tem3200
     i2c_id: ${i2c}
     update_interval: never
 
@@ -359,8 +359,8 @@ sensor:
         - component.update: temperature_celsius_
         - component.update: temperature_fahrenheit_
 
-  - platform: template
-    id: pressure_psi_
+  - id: pressure_psi_
+    platform: template
     name: pressure psi
     update_interval: never
     unit_of_measurement: psi
@@ -375,8 +375,8 @@ sensor:
     on_value:
       - then: ${pressure_unit_on_value if pressure.unit == "psi" else []}
 
-  - platform: template
-    id: pressure_mbar_
+  - id: pressure_mbar_
+    platform: template
     name: pressure mbar
     update_interval: never
     unit_of_measurement: mbar
@@ -392,9 +392,9 @@ sensor:
       - then: ${pressure_unit_on_value if pressure.unit == "mbar" else []}
       - then:
         - lambda: id(molar_density_).curry(id(pressure_mbar_));
-        
-  - platform: template
-    id: temperature_celsius_
+
+  - id: temperature_celsius_
+    platform: template
     name: temperature celsius
     update_interval: never
     unit_of_measurement: °C
@@ -407,8 +407,8 @@ sensor:
       - then: 
         - lambda: id(molar_density_).curry(id(temperature_celsius_));
 
-  - platform: template
-    id: temperature_fahrenheit_
+  - id: temperature_fahrenheit_
+    platform: template
     name: temperature fahrenheit
     update_interval: never
     unit_of_measurement: °F
@@ -422,8 +422,8 @@ sensor:
           - 100 -> 212
     on_value: ${temperature_unit_on_value if temperature.unit == "fahrenheit" else []}
 
-  - platform: qmp6988
-    id: qmp6988_
+  - id: qmp6988_
+    platform: qmp6988
     i2c_id: ${i2c}
     update_interval: never
     pressure:
@@ -446,8 +446,8 @@ sensor:
         - component.update: barometric_pressure_psi_
         - component.update: barometric_pressure_mbar_
 
-  - platform: template
-    id: barometric_pressure_psi_
+  - id: barometric_pressure_psi_
+    platform: template
     name: barometric pressure psi
     update_interval: never
     unit_of_measurement: psi
@@ -456,8 +456,8 @@ sensor:
     accuracy_decimals: ${pressure.mbar.precision}
     lambda: return id(barometric_pressure_).state / ${mbar_per_psi};
 
-  - platform: template
-    id: barometric_pressure_mbar_
+  - id: barometric_pressure_mbar_
+    platform: template
     name: barometric pressure mbar
     update_interval: never
     unit_of_measurement: mbar
@@ -466,8 +466,8 @@ sensor:
     accuracy_decimals: ${pressure.mbar.precision}
     lambda: return id(barometric_pressure_).state;  // 1 hPa = 1 mbar
 
-  - platform: composition_
-    id: molar_density_
+  - id: molar_density_
+    platform: composition_
     name: molar density
     unit_of_measurement: mol/m³
     state_class: measurement
