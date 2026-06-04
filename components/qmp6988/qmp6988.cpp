@@ -340,8 +340,16 @@ void QMP6988Component::dump_config() {
 }
 
 void QMP6988Component::update() {
-  if (!this->calculate_pressure_())
+  if (this->is_failed()) {
+    this->reset_to_construction_state();
+    this->setup();
+    // device is not ready yet, skip this update
     return;
+  }
+  if (!this->calculate_pressure_()) {
+    this->mark_failed(LOG_STR(ESP_LOG_MSG_COMM_FAIL));
+    return;
+  }
   float pressurehectopascals = this->qmp6988_data_.pressure / 100;
   float temperature = this->qmp6988_data_.temperature;
 
