@@ -286,14 +286,15 @@ bool QMP6988Component::calculate_pressure_() {
   int32_t p_raw, t_raw;
   uint8_t a_data_uint8_tr[6] = {0};
   int32_t t_int, p_int;
-  this->qmp6988_data_.temperature = 0;
-  this->qmp6988_data_.pressure = 0;
 
   err = this->read_register(QMP6988_PRESSURE_MSB_REG, a_data_uint8_tr, 6);
   if (err != i2c::ERROR_OK) {
     ESP_LOGE(TAG, "Error reading raw pressure/temp values");
+    this->status_set_warning();
     return false;
   }
+  this->status_clear_warning();
+
   p_read = encode_uint24(a_data_uint8_tr[0], a_data_uint8_tr[1], a_data_uint8_tr[2]);
   p_raw = (int32_t) (p_read - SUBTRACTOR);
 
@@ -347,6 +348,7 @@ void QMP6988Component::update() {
     this->mark_failed(LOG_STR(ESP_LOG_MSG_COMM_FAIL));
     return;
   }
+
   float pressurehectopascals = this->qmp6988_data_.pressure / 100;
   float temperature = this->qmp6988_data_.temperature;
 
