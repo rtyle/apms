@@ -104,13 +104,13 @@ substitutions:
       minimum: ${pressure_psi_minimum}
       maximum: ${pressure_psi_maximum}
       threshold: ${pressure_psi_threshold}
-      text: pressure_psi_text_
+      text: pressure_psi_label_text_
     mbar:
       precision: ${pressure_mbar_precision}
       minimum: ${pressure_mbar_minimum}
       maximum: ${pressure_mbar_maximum}
       threshold: ${pressure_mbar_threshold}
-      text: pressure_bar_text_
+      text: pressure_bar_label_text_
   temperature:
     unit: ${temperature_unit}
     fahrenheit:
@@ -182,6 +182,7 @@ esp32:
 i2c:
   - id: !extend ${i2c}
     # replace internal pullups with external 4.7k pullups per TE M3200 datasheet
+    # m5stack unit env iii (with qmp6988) has 4.7k pullups already
     scl_pullup_enabled: false
     sda_pullup_enabled: false
 
@@ -202,7 +203,7 @@ text_sensor:
     reset_reason:
       name: debug reset_reason
 
-  - id: pressure_psi_text_
+  - id: pressure_psi_label_text_
     platform: template
     internal: true
     update_interval: never
@@ -212,7 +213,7 @@ text_sensor:
         id: pressure_label_
         text: !lambda return x;
 
-  - id: pressure_bar_text_
+  - id: pressure_bar_label_text_
     platform: template
     internal: true
     update_interval: never
