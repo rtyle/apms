@@ -170,6 +170,7 @@ esphome:
     - script.execute: barometric_pressure_measurement_watchdog_
 
 esp32:
+  cpu_frequency: 80Mhz
   framework:
     sdkconfig_options:
       CONFIG_PARTITION_TABLE_OFFSET: "0xf000"

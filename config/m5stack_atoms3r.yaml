@@ -47,7 +47,6 @@ esp32:
   board: esp32-s3-devkitc-1
   variant: esp32s3
   flash_size: 8MB
-  cpu_frequency: 240Mhz
   framework:
     type: esp-idf
     sdkconfig_options:
@@ -81,7 +80,7 @@ i2c:
     sda: ${m5stack_atoms3r.gpio.grove._1}
     scan: true
 
-lp5562: 
+lp5562:
   id: ${m5stack_atoms3r.id.lp5562}
   i2c_id: ${m5stack_atoms3r.id.i2c}
   use_internal_clk: true
