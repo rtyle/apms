@@ -25,7 +25,7 @@ substitutions:
   pressure_minimum: ${pressure[pressure.unit].minimum}
   pressure_maximum: ${pressure[pressure.unit].maximum}
   pressure_threshold: ${pressure[pressure.unit].threshold}
-  pressure_text: ${pressure[pressure.unit].text}
+  pressure_label_text: ${pressure[pressure.unit].label_text}
 
   pressure_format: "%.${pressure_precision}f"
 
@@ -53,7 +53,7 @@ substitutions:
         id: pressure_indicator_
         value: !lambda return x * ${math.pow(10, pressure_precision)};
     - lvgl.widget.show: pressure_meter_
-    - component.update: ${pressure_text}
+    - component.update: ${pressure_label_text}
 
   barometric_pressure_state: id(barometric_pressure_${pressure.unit}_).state
   pressure_state: id(pressure_${pressure.unit}_).state
@@ -104,13 +104,13 @@ substitutions:
       minimum: ${pressure_psi_minimum}
       maximum: ${pressure_psi_maximum}
       threshold: ${pressure_psi_threshold}
-      text: pressure_psi_label_text_
+      label_text: pressure_psi_label_text_
     mbar:
       precision: ${pressure_mbar_precision}
       minimum: ${pressure_mbar_minimum}
       maximum: ${pressure_mbar_maximum}
       threshold: ${pressure_mbar_threshold}
-      text: pressure_bar_label_text_
+      label_text: pressure_bar_label_text_
   temperature:
     unit: ${temperature_unit}
     fahrenheit:
@@ -391,11 +391,10 @@ sensor:
     accuracy_decimals: ${pressure.psi.precision}
     lambda: return id(pressure_).state;
     filters:
-      - calibrate_linear:
-          - ${pressure.raw.psi_0} -> 0
-          - ${pressure.raw.psi_100} -> 100
-    on_value:
-      - then: ${pressure_unit_on_value if pressure.unit == "psi" else []}
+      calibrate_linear:
+        - ${pressure.raw.psi_0} -> 0
+        - ${pressure.raw.psi_100} -> 100
+    on_value: ${pressure_unit_on_value if pressure.unit == "psi" else []}
 
   - id: pressure_mbar_
     platform: template
@@ -407,9 +406,9 @@ sensor:
     accuracy_decimals: ${pressure.mbar.precision}
     lambda: return id(pressure_).state;
     filters:
-      - calibrate_linear:
-          - ${pressure.raw.psi_0} -> 0
-          - ${pressure.raw.psi_100} -> ${100 * mbar_per_psi}
+      calibrate_linear:
+        - ${pressure.raw.psi_0} -> 0
+        - ${pressure.raw.psi_100} -> ${100 * mbar_per_psi}
     on_value:
       - then: ${pressure_unit_on_value if pressure.unit == "mbar" else []}
       - then:
@@ -439,9 +438,9 @@ sensor:
     accuracy_decimals: ${temperature.fahrenheit.precision}
     lambda: return id(temperature_).state;
     filters:
-      - calibrate_linear:
-          - 0 -> 32
-          - 100 -> 212
+      calibrate_linear:
+        - 0 -> 32
+        - 100 -> 212
     on_value: ${temperature_unit_on_value if temperature.unit == "fahrenheit" else []}
 
   - id: qmp6988_
@@ -494,7 +493,7 @@ sensor:
       - barometric_pressure_
     lambda: |-
       // PV = nRT ⇒ n/V = P/(R·T)
-      // P is absolute pressure (gauge + barometric) in Pa = kg/(m·s²) (1 mbar = 100 Pa)
+      // P is absolute pressure (gauge + barometric) in Pa (kg/(m·s²), 100 Pa = 1 mbar)
       // V is volume in m³
       // n is moles in mol
       // R is ideal gas constant in kg·m²/(s²·mol·K) (8.31446)
@@ -502,7 +501,7 @@ sensor:
       static auto constexpr pascal_per_mbar{100.0f};
       static auto constexpr kelvin_offset_celsius{273.15f};
       static auto constexpr R{8.31446f};
-      auto [gp, t, bp] = id(molar_density_).consume();
+      auto const [gp, t, bp]{id(molar_density_).consume()};
       auto const P{pascal_per_mbar * (*gp + *bp)};
       auto const T{kelvin_offset_celsius + *t};
       return P / (R * T);	// = n / V
@@ -523,21 +522,21 @@ image:
   - id: apms_
     file: apms.png
     type: rgb565
-    resize: ${m5stack_atoms3r.display.size}
+    resize: ${display_size}
   - id: pressure_scale_
     file: scale_${pressure.unit}.png
     type: rgb565
-    resize: ${m5stack_atoms3r.display.size}
+    resize: ${display_size}
     transparency: alpha_channel
   - id: temperature_scale_
     file: scale_${temperature.unit}.png
     type: rgb565
-    resize: ${m5stack_atoms3r.display.size}
+    resize: ${display_size}
     transparency: alpha_channel
   - id: molar_density_scale_
     file: scale_molar_density.png
     type: rgb565
-    resize: ${m5stack_atoms3r.display.size}
+    resize: ${display_size}
     transparency: alpha_channel
 
 lvgl:

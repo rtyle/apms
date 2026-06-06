@@ -21,6 +21,7 @@ packages:
       light: ${m5stack_atoms3r.id.light}
       display: ${m5stack_atoms3r.id.display}
       button: ${m5stack_atoms3r.id.button}
+      display_size: ${m5stack_atoms3r.display.size}
 
 logger:
   level: ${logger_level}
