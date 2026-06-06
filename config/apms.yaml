@@ -348,6 +348,7 @@ sensor:
     internal: true
     update_interval: ${update_interval}s
     lambda: |-
+      id(molar_density_).consume(); // any stale values
       id(tem3200_).update();
       id(qmp6988_).update();
       if (id(barometric_pressure_measurement_alarm_).state) {
