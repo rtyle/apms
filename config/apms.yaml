@@ -368,12 +368,12 @@ sensor:
       id: pressure_
       internal: true
       on_value:
+        - script.execute: pressure_measurement_watchdog_
         - component.update: pressure_psi_
         - component.update: pressure_mbar_
         - binary_sensor.template.publish:
             id: ${pressure.measurement_alarm}
             state: OFF
-        - script.execute: pressure_measurement_watchdog_
 
     temperature:
       id: temperature_
@@ -453,12 +453,12 @@ sensor:
       internal: true
       # unit_of_measurement: hPa
       on_value:
-        - binary_sensor.template.publish:
-            id: ${barometric_pressure.measurement_alarm}
-            state: OFF
         - script.execute: barometric_pressure_measurement_watchdog_
         - component.update: barometric_pressure_psi_
         - component.update: barometric_pressure_mbar_
+        - binary_sensor.template.publish:
+            id: ${barometric_pressure.measurement_alarm}
+            state: OFF
         - lambda: id(molar_density_).curry(id(barometric_pressure_));
 
   - id: barometric_pressure_psi_
