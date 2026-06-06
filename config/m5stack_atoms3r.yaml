@@ -29,15 +29,15 @@ substitutions:
         dc: GPIO42
         reset: GPIO48
         cs: GPIO14
-  m5stack_atom_bus:
-    _0:
-      _0: GPIO39
-      _1: GPIO38
-    _1:
-      _1: GPIO5
-      _2: GPIO6
-      _3: GPIO7
-      _4: GPIO8
+    atom_bus:
+      _0:
+        _0: GPIO39
+        _1: GPIO38
+      _1:
+        _1: GPIO5
+        _2: GPIO6
+        _3: GPIO7
+        _4: GPIO8
 
 external_components: 
   - source: github://m5stack/esphome-yaml/components@main
