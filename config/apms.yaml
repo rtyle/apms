@@ -468,7 +468,7 @@ sensor:
     unit_of_measurement: psi
     state_class: measurement
     device_class: pressure
-    accuracy_decimals: ${pressure.mbar.precision}
+    accuracy_decimals: ${pressure.psi.precision}
     lambda: return id(barometric_pressure_).state / ${mbar_per_psi};
 
   - id: barometric_pressure_mbar_
