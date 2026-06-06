@@ -252,13 +252,6 @@ script:
           id: ${barometric_pressure.measurement_alarm}
           state: ON
       - lambda: id(molar_density_).curry(id(barometric_pressure_), ${barometric_pressure.mbar});
-      - delay: ${update_interval - 10}s
-      - while:
-          condition:
-            binary_sensor.is_on: ${barometric_pressure.measurement_alarm}
-          then:
-            - lambda: id(molar_density_).curry(id(barometric_pressure_), ${barometric_pressure.mbar});
-            - delay: ${update_interval}s
 
 binary_sensor:
   - id: !extend ${button}
@@ -355,8 +348,11 @@ sensor:
     internal: true
     update_interval: ${update_interval}s
     lambda: |-
-      id(qmp6988_).update();
       id(tem3200_).update();
+      id(qmp6988_).update();
+      if (id(barometric_pressure_measurement_alarm_).state) {
+        id(molar_density_).curry(id(barometric_pressure_), ${barometric_pressure.mbar});
+      }
       return {};
 
   - id: tem3200_
