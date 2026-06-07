@@ -1,14 +1,14 @@
 substitutions:
   m5stack_atoms3r:
     id:
-      i2c: m5stack_atoms3r_i2c
-      i2c_grove: m5stack_atoms3r_i2c_grove
-      button: m5stack_atoms3r_button
-      lp5562: m5stack_atoms3r_lp5562
-      output: m5stack_atoms3r_output
-      light: m5stack_atoms3r_light
-      spi: m5stack_atoms3r_spi
-      display: m5stack_atoms3r_display
+      i2c: m5stack_atoms3r_i2c_
+      i2c_grove: m5stack_atoms3r_i2c_grove_
+      button: m5stack_atoms3r_button_
+      lp5562: m5stack_atoms3r_lp5562_
+      output: m5stack_atoms3r_output_
+      light: m5stack_atoms3r_light_
+      spi: m5stack_atoms3r_spi_
+      display: m5stack_atoms3r_display_
     display:
       width: 128
       height: 128
