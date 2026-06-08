@@ -24,6 +24,7 @@ This is a better solution.
 
 ## apms features
 
+* Measures pressure, temperature and molar density (per the [ideal gas law](https://en.wikipedia.org/wiki/Ideal_gas_law))
 * Small, attractive package
 * Display with user interface
 * Display can be turned off
@@ -85,6 +86,20 @@ For bench testing, a capped tank valve can substitute for the expansion tank.
     [Amazon](https://www.amazon.com/dp/B0CPPBSFV5)
 * [uxcell ¼″ NPT cap (f24032100ux0225)](https://www.harfington.com/products/p-1684955?variant=46634064511225)
     [Amazon](https://www.amazon.com/dp/B0DLKNM5CG)
+
+For the most accurate measure of molar density, a dynamic measure of barometric pressure must be provided;
+otherwise, a configurable static barometric pressure is used.
+For this purpose, an M5Stack Unit ENV-III sensor can be inserted onto the I²C bus with an M5Stack Grove T header.
+This sensor will obivate the need for separate 4.7kΩ pullup resistors as they are included in the sensor package.
+
+* [M5Stack Unit ENV-III (U001-C)](https://docs.m5stack.com/en/unit/envIII)
+    [Amazon](https://www.amazon.com/dp/B0FNNGJ7QJ)
+    [Digikey](https://www.digikey.com/en/products/detail/m5stack-technology-co-ltd/U001-C/14672141)
+    [Mouser](https://www.mouser.com/ProductDetail/M5Stack/U001-C?qs=e8oIoAS2J1R2mB7ZY1%252BSZg%3D%3D)
+* [M5Stack Grove T connector (U039-B)](https://docs.m5stack.com/en/accessory/converter/grove_t)
+    [Amazon](https://www.amazon.com/dp/B0GZDL4NZ6)
+    [Digikey](https://www.digikey.com/en/products/detail/m5stack-technology-co-ltd/U039-B/16370074)
+    [Mouser](https://www.mouser.com/ProductDetail/M5Stack/U039-B?qs=81r%252BiQLm7BS%2F8qLurmjgEQ%3D%3D)
 
 ### Software
 
