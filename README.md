@@ -193,7 +193,7 @@ This will be used to name the `esphome` component and must follow the [ESPHome c
 
 Choice of a different name will require a different `${name}_.yaml` file.
 
-    cp config/{apms,${name}_.yaml; vi config/{name}_.yaml
+    cp config/{apms,${name}}_.yaml; vi config/${name}_.yaml
 
 By default, this file is empty but one can use it to override some configuration settings.
 For example, this could be used to override any of the default `!secret` selections.
