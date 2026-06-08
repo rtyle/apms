@@ -173,6 +173,28 @@ For example,
         -s logger_level DEBUG\
         config main.yaml
 
+By default, `${name}` in the yaml configuration, is substituted with `apms`.
+This will be used to name the `esphome` component and must follow the [ESPHome core configuration](https://esphome.io/components/esphome/) guidelines.
+
+Choice of a different name will require a different `${name}_.yaml` file.
+
+    cp config/{apml,${name}_.yaml; vi config/{name}_.yaml
+
+By default, this file is empty but one can use it to override some configuration settings.
+For example, this could be used to override any of the default `!secret` selections.
+
+    api:
+      encryption:
+        key: !secret apms-tank-api-encryption-key
+    
+    ota:
+      - id: !extend ota_
+        password: !secret apms-tank-ota-password
+    
+    smtp_:
+      - id: !extend smtp__
+        password: !secret apms-tank-smtp-password
+
 The first firmware flash of this ESPHome configuration
 must be done with a USB cable between your computer and the M5Stack CoreS3.
 **Do not interrupt this first boot!**
