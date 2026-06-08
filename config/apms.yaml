@@ -127,7 +127,7 @@ substitutions:
     maximum: ${molar_density_maximum}
     format: "%.${molar_density_precision}f"
   
-  apms_smtp: !include apms-smtp.yaml
+  apms_smtp: !include apms_smtp.yaml
   smtp: true
   
 external_components:
@@ -138,9 +138,11 @@ external_components:
 
 packages:
   - ${apms_smtp if smtp else {}}
+  - !include ${name}_.yaml
 
 ota:
-  - platform: esphome
+  - id: ota_
+    platform: esphome
     password: !secret ota-password
 
 api:

@@ -1,4 +1,4 @@
 /.esphome/
-/apms*.sh
+/apms-*
 /secrets.yaml
 /smtp.yaml
