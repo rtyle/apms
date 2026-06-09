@@ -96,7 +96,7 @@ This sensor will obivate the need for separate 4.7kΩ pullup resistors as they a
     [Amazon](https://www.amazon.com/dp/B0FNNGJ7QJ)
     [Digikey](https://www.digikey.com/en/products/detail/m5stack-technology-co-ltd/U001-C/14672141)
     [Mouser](https://www.mouser.com/ProductDetail/M5Stack/U001-C?qs=e8oIoAS2J1R2mB7ZY1%252BSZg%3D%3D)
-* [M5Stack Grove T connector (U039-B)](https://docs.m5stack.com/en/accessory/converter/grove_t)
+* [M5Stack Grove T header (U039-B)](https://docs.m5stack.com/en/accessory/converter/grove_t)
     [Amazon](https://www.amazon.com/dp/B0GZDL4NZ6)
     [Digikey](https://www.digikey.com/en/products/detail/m5stack-technology-co-ltd/U039-B/16370074)
     [Mouser](https://www.mouser.com/ProductDetail/M5Stack/U039-B?qs=81r%252BiQLm7BS%2F8qLurmjgEQ%3D%3D)
