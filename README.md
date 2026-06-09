@@ -212,7 +212,7 @@ For example, this could be used to override any of the default `!secret` selecti
         password: !secret apms-tank-smtp-password
 
 The first firmware flash of this ESPHome configuration
-must be done with a USB cable between your computer and the M5Stack CoreS3.
+must be done with a USB cable between your computer and the M5Stack AtomS3R.
 **Do not interrupt this first boot!**
 
     esphome run config/main.yaml
