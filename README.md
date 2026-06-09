@@ -119,7 +119,7 @@ The pressure transducer requires a reference vent to the atmosphere
 which is accomplished via its cable.
 The cable end should be terminated to a clean and dry area.
 The cable wires must be adapted to a Grove connector without sealing the cable vent.
-The adaptation must include the I²C pullup resistors.
+The adaptation must include I²C pullup resistors – perhaps by way of an M5Stack Unit ENV-III sharing the bus.
 
 Each ¼″ NPT fitting should use a high quality thread sealant.
 
