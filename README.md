@@ -24,13 +24,14 @@ This is a better solution.
 
 ## apms features
 
-* Measures pressure, temperature and molar density (per the [ideal gas law](https://en.wikipedia.org/wiki/Ideal_gas_law))
+* Measures pressure (psi/mbar), temperature (°F/°C) and molar density (per the [ideal gas law](https://en.wikipedia.org/wiki/Ideal_gas_law))
 * Small, attractive package
 * Display with user interface
 * Display can be turned off
 * Powered by [Power-over-Ethernet](https://en.wikipedia.org/wiki/Power_over_Ethernet) (PoE)
-* Smart-home integrable but not required for notification
-* Email notification of pressure threshold crossings
+* Smart-home integrable
+* Pressure measurement and threshold alarms
+* E-mail notification
 
 ## Architecture
 
