@@ -235,7 +235,7 @@ Connect by ethernet to a power-over-ethernet capable port and unplug the USB cab
 
 ## Usage
 
-By pressing the integrated display button, **apms** will rotate through its splash screen, pressure meter and thermometer.
+By pressing the integrated display button, **apms** will rotate through its splash screen, pressure meter, thermometer and molar density meter.
 Holding the button will dim the display to the desired brightness, including off.
 The display can be restored to full brightness with another button hold (or press).
 
