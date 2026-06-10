@@ -226,6 +226,19 @@ text_sensor:
         id: pressure_label_
         text: !lambda return x;
 
+interval:
+  - interval: ${update_interval}s
+    then:
+      - lambda: id(molar_density_).consume(); // any stale values
+      - component.update: tem3200_
+      - delay: 1ms # yield
+      - component.update: qmp6988_
+      - if:
+          condition:
+            binary_sensor.is_on: ${barometric_pressure.measurement_alarm}
+          then:
+            lambda: id(molar_density_).curry(id(barometric_pressure_), ${barometric_pressure.mbar});
+
 script:
   - id: pressure_measurement_watchdog_
     mode: restart
@@ -344,19 +357,6 @@ sensor:
       name: debug psram
     cpu_frequency:
       name: debug cpu_frequency
-
-  - id: updater_
-    platform: template
-    internal: true
-    update_interval: ${update_interval}s
-    lambda: |-
-      id(molar_density_).consume(); // any stale values
-      id(tem3200_).update();
-      id(qmp6988_).update();
-      if (id(barometric_pressure_measurement_alarm_).state) {
-        id(molar_density_).curry(id(barometric_pressure_), ${barometric_pressure.mbar});
-      }
-      return {};
 
   - id: tem3200_
     platform: tem3200
