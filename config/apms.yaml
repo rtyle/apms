@@ -129,6 +129,9 @@ substitutions:
   
   apms_smtp: !include apms_smtp.yaml
   smtp: true
+
+  apms_debug: !include apms_debug.yaml
+  debug: false
   
 external_components:
   - source:
@@ -138,6 +141,7 @@ external_components:
 
 packages:
   - ${apms_smtp if smtp else {}}
+  - ${apms_debug if debug else {}}
   - !include ${name}_.yaml
 
 ota:
@@ -152,9 +156,6 @@ api:
 
 web_server:
   version: 3
-
-debug:
-  update_interval: 60s
 
 globals:
   - id: button_held_
@@ -199,33 +200,6 @@ display:
     auto_clear_enabled: false
     update_interval: never
 
-text_sensor:
-  - platform: debug
-    device:
-      name: debug device
-    reset_reason:
-      name: debug reset_reason
-
-  - id: pressure_psi_label_text_
-    platform: template
-    internal: true
-    update_interval: never
-    lambda: return str_sprintf("${pressure_format}", ${pressure_state});
-    on_value:
-      lvgl.label.update:
-        id: pressure_label_
-        text: !lambda return x;
-
-  - id: pressure_bar_label_text_
-    platform: template
-    internal: true
-    update_interval: never
-    lambda: return str_sprintf("%.${pressure.mbar.precision + 3}f", ${pressure_state} / ${math.pow(10, 3)});
-    on_value:
-      lvgl.label.update:
-        id: pressure_label_
-        text: !lambda return x;
-
 interval:
   - interval: ${update_interval}s
     then:
@@ -267,6 +241,27 @@ script:
           id: ${barometric_pressure.measurement_alarm}
           state: ON
       - lambda: id(molar_density_).curry(id(barometric_pressure_), ${barometric_pressure.mbar});
+
+text_sensor:
+  - id: pressure_psi_label_text_
+    platform: template
+    internal: true
+    update_interval: never
+    lambda: return str_sprintf("${pressure_format}", ${pressure_state});
+    on_value:
+      lvgl.label.update:
+        id: pressure_label_
+        text: !lambda return x;
+
+  - id: pressure_bar_label_text_
+    platform: template
+    internal: true
+    update_interval: never
+    lambda: return str_sprintf("%.${pressure.mbar.precision + 3}f", ${pressure_state} / ${math.pow(10, 3)});
+    on_value:
+      lvgl.label.update:
+        id: pressure_label_
+        text: !lambda return x;
 
 binary_sensor:
   - id: !extend ${button}
@@ -346,18 +341,6 @@ binary_sensor:
     trigger_on_initial_state: true
 
 sensor:
-  - platform: debug
-    free:
-      name: debug free
-    block:
-      name: debug block
-    loop_time:
-      name: debug loop_time
-    psram:
-      name: debug psram
-    cpu_frequency:
-      name: debug cpu_frequency
-
   - id: tem3200_
     platform: tem3200
     i2c_id: ${i2c}

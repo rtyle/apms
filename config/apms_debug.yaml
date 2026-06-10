@@ -1,0 +1,22 @@
+debug:
+  update_interval: 60s
+
+sensor:
+  - platform: debug
+    free:
+      name: debug free
+    block:
+      name: debug block
+    loop_time:
+      name: debug loop_time
+    psram:
+      name: debug psram
+    cpu_frequency:
+      name: debug cpu_frequency
+
+text_sensor:
+  - platform: debug
+    device:
+      name: debug device
+    reset_reason:
+      name: debug reset_reason
