@@ -36,7 +36,7 @@ substitutions:
         then:
           - logger.log:
               level: INFO
-              format: "${name} pressure (${pressure_format} ${pressure.unit}) < ${pressure_threshold}"
+              format: "${name} pressure ${pressure_format} ${pressure.unit} < ${pressure_threshold}"
               args: [x]
           - binary_sensor.template.publish:
               id: ${pressure.threshold_alarm}
@@ -44,7 +44,7 @@ substitutions:
         else:
           - logger.log:
               level: WARN
-              format: "${name} pressure (${pressure_format} ${pressure.unit}) >= ${pressure_threshold}"
+              format: "${name} pressure ${pressure_format} ${pressure.unit} >= ${pressure_threshold}"
               args: [x]
           - binary_sensor.template.publish:
               id: ${pressure.threshold_alarm}
