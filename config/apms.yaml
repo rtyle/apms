@@ -1,5 +1,6 @@
-# only top level substitutions can be overridden on the esphome command line
-# command line substitutions will always be strings!
+# only top level substitutions can be overridden on the esphome command line.
+# command line substitution values will always be typed as strings
+# even though the same values parsed from yaml would be typed otherwise.
 substitutions:
   update_interval: 60
 
