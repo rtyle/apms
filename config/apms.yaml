@@ -1,12 +1,12 @@
 # only top level substitutions can be overridden on the esphome command line
+# command line substitutions will always be strings!
 substitutions:
   update_interval: 60
 
   rotation: 0
 
-  mbar_per_psi: 68.94757
   barometric_pressure_psi: 14.696
-  barometric_pressure_mbar: ${mbar_per_psi * barometric_pressure_psi}
+  barometric_pressure_mbar: ${pressure.mbar.per_psi * (barometric_pressure_psi | float)}
 
   pressure_raw_psi_0: 1000
   pressure_raw_psi_100: 15000
@@ -91,42 +91,43 @@ substitutions:
 
   barometric_pressure:
     measurement_alarm: barometric_pressure_measurement_alarm_
-    psi: ${barometric_pressure_psi}
-    mbar: ${barometric_pressure_mbar}
+    psi: ${(barometric_pressure_psi | float)}
+    mbar: ${(barometric_pressure_mbar | float)}
 
   pressure:
     measurement_alarm: pressure_measurement_alarm_
     threshold_alarm: pressure_threshold_alarm_
     raw:
-      psi_0: ${pressure_raw_psi_0}
-      psi_100: ${pressure_raw_psi_100}
+      psi_0: ${(pressure_raw_psi_0 | int)}
+      psi_100: ${(pressure_raw_psi_100 | int)}
     unit: ${pressure_unit}
     psi:
-      precision: ${pressure_psi_precision}
-      minimum: ${pressure_psi_minimum}
-      maximum: ${pressure_psi_maximum}
-      threshold: ${pressure_psi_threshold}
+      precision: ${(pressure_psi_precision | int)}
+      minimum: ${(pressure_psi_minimum | int)}
+      maximum: ${(pressure_psi_maximum | int)}
+      threshold: ${(pressure_psi_threshold | int)}
       label_text: pressure_psi_label_text_
     mbar:
-      precision: ${pressure_mbar_precision}
-      minimum: ${pressure_mbar_minimum}
-      maximum: ${pressure_mbar_maximum}
-      threshold: ${pressure_mbar_threshold}
+      precision: ${(pressure_mbar_precision | int)}
+      minimum: ${(pressure_mbar_minimum | int)}
+      maximum: ${(pressure_mbar_maximum | int)}
+      threshold: ${(pressure_mbar_threshold | int)}
       label_text: pressure_bar_label_text_
+      per_psi: 68.94757
   temperature:
     unit: ${temperature_unit}
     fahrenheit:
-      precision: ${temperature_fahrenheit_precision}
-      minimum: ${temperature_fahrenheit_minimum}
-      maximum: ${temperature_fahrenheit_maximum}
+      precision: ${(temperature_fahrenheit_precision | int)}
+      minimum: ${(temperature_fahrenheit_minimum | int)}
+      maximum: ${(temperature_fahrenheit_maximum | int)}
     celsius:
-      precision: ${temperature_celsius_precision}
-      minimum: ${temperature_celsius_minimum}
-      maximum: ${temperature_celsius_maximum}
+      precision: ${(temperature_celsius_precision | int)}
+      minimum: ${(temperature_celsius_minimum | int)}
+      maximum: ${(temperature_celsius_maximum | int)}
   molar_density:
-    precision: ${molar_density_precision}
-    minimum: ${molar_density_minimum}
-    maximum: ${molar_density_maximum}
+    precision: ${(molar_density_precision | int)}
+    minimum: ${(molar_density_minimum | int)}
+    maximum: ${(molar_density_maximum | int)}
     format: "%.${molar_density_precision}f"
   
   apms_smtp: !include apms_smtp.yaml
@@ -142,8 +143,8 @@ external_components:
     components: [composition_, qmp6988]
 
 packages:
-  - ${apms_smtp if smtp else {}}
-  - ${apms_debug if debug else {}}
+  - ${apms_smtp if smtp in [true, 'true'] else {}}
+  - ${apms_debug if debug in [true, 'true'] else {}}
   - !include ${name}_.yaml
 
 ota:
@@ -393,7 +394,7 @@ sensor:
     filters:
       calibrate_linear:
         - ${pressure.raw.psi_0} -> 0
-        - ${pressure.raw.psi_100} -> ${100 * mbar_per_psi}
+        - ${pressure.raw.psi_100} -> ${100 * pressure.mbar.per_psi}
     on_value:
       - then: ${pressure_unit_on_value if pressure.unit == "mbar" else []}
       - then:
@@ -453,7 +454,7 @@ sensor:
     state_class: measurement
     device_class: pressure
     accuracy_decimals: ${pressure.psi.precision}
-    lambda: return id(barometric_pressure_).state / ${mbar_per_psi};
+    lambda: return id(barometric_pressure_).state / ${pressure.mbar.per_psi};
 
   - id: barometric_pressure_mbar_
     platform: template
