@@ -24,7 +24,8 @@ This is a better solution.
 
 ## apms features
 
-* Measures pressure (psi/mbar), temperature (°F/°C) and molar density (per the [ideal gas law](https://en.wikipedia.org/wiki/Ideal_gas_law))
+* Measures pressure (psi/mbar) and temperature (°F/°C)
+* Derives molar density per the [ideal gas law](https://en.wikipedia.org/wiki/Ideal_gas_law)
 * Small, attractive package
 * Display with user interface
 * Display can be turned off
