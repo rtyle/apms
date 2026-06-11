@@ -44,12 +44,12 @@ We use an Atom core with a PoE base.
 PoE power must be provided through a capable switch port or PoE injector.
 
 * [M5Stack AtomS3R (C126)](https://docs.m5stack.com/en/core/AtomS3R)
-    [Amazon](https://www.amazon.com/M5Stack-Official-0-85-inch-Atom-S3R/dp/B0F1X6JSBL)
-    [Digikey](https://www.digikey.com/en/products/detail/m5stack-technology-co-ltd/C126/25600008)
-    [Mouser](https://www.mouser.com/ProductDetail/M5Stack/K147?qs=2FehpBK1j97%2FnUpuUy8sGA%3D%3D)
+    ⋅ [Amazon](https://www.amazon.com/M5Stack-Official-0-85-inch-Atom-S3R/dp/B0F1X6JSBL)
+    ⋅ [Digikey](https://www.digikey.com/en/products/detail/m5stack-technology-co-ltd/C126/25600008)
+    ⋅ [Mouser](https://www.mouser.com/ProductDetail/M5Stack/K147?qs=2FehpBK1j97%2FnUpuUy8sGA%3D%3D)
 * [M5Stack Atomic PoE Base (A091)](https://docs.m5stack.com/en/atom/Atomic%20PoE%20Base)
-    [Digikey](https://www.digikey.com/en/products/detail/m5stack-technology-co-ltd/A091/22266234)
-    [Mouser](https://www.mouser.com/ProductDetail/M5Stack/A091?qs=mELouGlnn3cabSn6LutRaQ%3D%3D)
+    ⋅ [Digikey](https://www.digikey.com/en/products/detail/m5stack-technology-co-ltd/A091/22266234)
+    ⋅ [Mouser](https://www.mouser.com/ProductDetail/M5Stack/A091?qs=mELouGlnn3cabSn6LutRaQ%3D%3D)
 
 AtomS3R has a standard [Grove](https://wiki.seeedstudio.com/Grove_System/) connector (HY2.0-4P)
 for supporting an external I²C pressure transducer
@@ -60,37 +60,37 @@ These can be soldered inline or applied to a grove to grove connector.
 For bench testing, a grove to 4-pin extension connector and a breadboard are convenient.
 
 * [M5Stack Grove Cable (A034-B)](https://docs.m5stack.com/en/accessory/cable/grove_cable)
-    [Digikey](https://www.digikey.com/en/products/detail/m5stack-technology-co-ltd/A034-B/16370068)
-    [Mouser](https://www.mouser.com/ProductDetail/M5Stack/A034-B?qs=81r%252BiQLm7BT61XjWHYVAMA%3D%3D)
+    ⋅ [Digikey](https://www.digikey.com/en/products/detail/m5stack-technology-co-ltd/A034-B/16370068)
+    ⋅ [Mouser](https://www.mouser.com/ProductDetail/M5Stack/A034-B?qs=81r%252BiQLm7BT61XjWHYVAMA%3D%3D)
 * [M5Stack Grove to Grove extension connector (A040)](https://docs.m5stack.com/en/accessory/converter/grove2grove)
-    [Digikey](https://www.digikey.com/en/products/detail/m5stack-technology-co-ltd/A040/16370069)
-    [Mouser](https://www.mouser.com/ProductDetail/170-A040)
+    ⋅ [Digikey](https://www.digikey.com/en/products/detail/m5stack-technology-co-ltd/A040/16370069)
+    ⋅ [Mouser](https://www.mouser.com/ProductDetail/170-A040)
 * [M5Stack Grove to 4P extension connector (A099)](https://docs.m5stack.com/en/accessory/converter/grove_to_4p)
-    [Digikey](https://www.digikey.com/en/products/detail/m5stack-technology-co-ltd/A099/14318608)
-    [Mouser](https://www.mouser.com/ProductDetail/170-A099)
+    ⋅ [Digikey](https://www.digikey.com/en/products/detail/m5stack-technology-co-ltd/A099/14318608)
+    ⋅ [Mouser](https://www.mouser.com/ProductDetail/170-A099)
 * YAGEO 4.7kΩ resistors (MFR25SFRF52-4K7)
-    [Digikey](https://www.digikey.com/en/products/detail/yageo/MFR25SFRF52-4K7/9143469)
-    [Mouser](https://www.mouser.com/ProductDetail/603-MFR25SFRF52-4K7)
+    ⋅ [Digikey](https://www.digikey.com/en/products/detail/yageo/MFR25SFRF52-4K7/9143469)
+    ⋅ [Mouser](https://www.mouser.com/ProductDetail/603-MFR25SFRF52-4K7)
 * [TE M3200 Pressure Transducer (M32JM-000105-100PG)](https://www.te.com/en/product-20006465-00.html)
-    [Digikey](https://www.digikey.com/en/products/detail/te-connectivity-measurement-specialties/M32JM-000105-100PG/9695477)
-    [Mouser](https://www.mouser.com/ProductDetail/TE-Connectivity-Measurement-Specialties/M32JM-000105-100PG?qs=lc2O%252BfHJPVYobfuHIj4Lyg%3D%3D)
+    ⋅ [Digikey](https://www.digikey.com/en/products/detail/te-connectivity-measurement-specialties/M32JM-000105-100PG/9695477)
+    ⋅ [Mouser](https://www.mouser.com/ProductDetail/TE-Connectivity-Measurement-Specialties/M32JM-000105-100PG?qs=lc2O%252BfHJPVYobfuHIj4Lyg%3D%3D)
 * [Godeson Air Chuck (A38)](https://www.nbgodeson.com/en/productshow-1771.html)
-    [Amazon](https://www.amazon.com/dp/B07JMNGBRG)
+    ⋅ [Amazon](https://www.amazon.com/dp/B07JMNGBRG)
   
 Optionally, by using a T-valve adapter off the tank's Schrader valve, pressure can be monitored and maintained.
 The maintenance port on the T-valve adapter should be capped when not in use.
 
 * [HawksHead T-Valve Adapter for TMPS Tires (TV1A)](https://www.hawksheadsystems.com/t%20valve%20adapters.html)
-    [tpms.ca](https://tpms.ca/products/t-valve-adapters)
+    ⋅ [tpms.ca](https://tpms.ca/products/t-valve-adapters)
 * [Milton High Performance Hex Head Valve Cap (s-435)](https://miltonindustries.com/products/high-performance-hex-head-valve-cap)
-    [Amazon](https://www.amazon.com/dp/B000CONUGU)
+    ⋅ [Amazon](https://www.amazon.com/dp/B000CONUGU)
 
 For bench testing, a capped tank valve can substitute for the expansion tank.
 
 * Godeson ¼″ NPT tank valve
-    [Amazon](https://www.amazon.com/dp/B0CPPBSFV5)
+    ⋅ [Amazon](https://www.amazon.com/dp/B0CPPBSFV5)
 * [uxcell ¼″ NPT cap (f24032100ux0225)](https://www.harfington.com/products/p-1684955?variant=46634064511225)
-    [Amazon](https://www.amazon.com/dp/B0DLKNM5CG)
+    ⋅ [Amazon](https://www.amazon.com/dp/B0DLKNM5CG)
 
 For the most accurate measure of molar density, a dynamic measure of barometric pressure must be provided;
 otherwise, a configurable static barometric pressure is used.
@@ -98,13 +98,13 @@ For this purpose, an M5Stack Unit ENV-III sensor can be inserted onto the I²C b
 This sensor will obivate the need for separate 4.7kΩ pullup resistors as they are included in the sensor package.
 
 * [M5Stack Unit ENV-III (U001-C)](https://docs.m5stack.com/en/unit/envIII)
-    [Amazon](https://www.amazon.com/dp/B0FNNGJ7QJ)
-    [Digikey](https://www.digikey.com/en/products/detail/m5stack-technology-co-ltd/U001-C/14672141)
-    [Mouser](https://www.mouser.com/ProductDetail/M5Stack/U001-C?qs=e8oIoAS2J1R2mB7ZY1%252BSZg%3D%3D)
+    ⋅ [Amazon](https://www.amazon.com/dp/B0FNNGJ7QJ)
+    ⋅ [Digikey](https://www.digikey.com/en/products/detail/m5stack-technology-co-ltd/U001-C/14672141)
+    ⋅ [Mouser](https://www.mouser.com/ProductDetail/M5Stack/U001-C?qs=e8oIoAS2J1R2mB7ZY1%252BSZg%3D%3D)
 * [M5Stack Grove T header (U039-B)](https://docs.m5stack.com/en/accessory/converter/grove_t)
-    [Amazon](https://www.amazon.com/dp/B0GZDL4NZ6)
-    [Digikey](https://www.digikey.com/en/products/detail/m5stack-technology-co-ltd/U039-B/16370074)
-    [Mouser](https://www.mouser.com/ProductDetail/M5Stack/U039-B?qs=81r%252BiQLm7BS%2F8qLurmjgEQ%3D%3D)
+    ⋅ [Amazon](https://www.amazon.com/dp/B0GZDL4NZ6)
+    ⋅ [Digikey](https://www.digikey.com/en/products/detail/m5stack-technology-co-ltd/U039-B/16370074)
+    ⋅ [Mouser](https://www.mouser.com/ProductDetail/M5Stack/U039-B?qs=81r%252BiQLm7BS%2F8qLurmjgEQ%3D%3D)
 
 ### Software
 
@@ -128,15 +128,15 @@ The adaptation must include I²C pullup resistors – perhaps by way of an M5Sta
 Each ¼″ NPT fitting should use a high quality thread sealant.
 
 * [Blue Monster PFTE thread seal tape (70885)](https://cleanfit.com/blue_monster_ptfe_thread_seal_tape_70885.shtml)
-    [Home Depot](https://www.homedepot.com/pep/306136345)
+    ⋅ [Home Depot](https://www.homedepot.com/pep/306136345)
 * [Blue Monster thread sealant with PFTE (76009)](https://cleanfit.com/blue_monster_industrial_grade_thread_sealant_76001.shtml)
-    [Home Depot](https://www.homedepot.com/pep/306136383)
+    ⋅ [Home Depot](https://www.homedepot.com/pep/306136383)
 
 The gaskets on the Schrader valve connections should be sealed as well.
 
 * [Refrigeration Technologies Nylog Blue gasket & thread sealant (RT201BP)](https://www.refrigtech.com/nylog-blue/)
-    [Amazon](https://www.amazon.com/dp/B008HOSQQQ)
-    [Home Depot](https://www.homedepot.com/p/333685992)
+    ⋅ [Amazon](https://www.amazon.com/dp/B008HOSQQQ)
+    ⋅ [Home Depot](https://www.homedepot.com/p/333685992)
 
 ### Software
 
