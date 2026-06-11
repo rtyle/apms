@@ -509,7 +509,7 @@ sensor:
     platform: sht3xd
     i2c_id: ${i2c}
     humidity:
-      id: sht3xd_humidity_
+      id: humidity_
       name: humidity
 
 image:
