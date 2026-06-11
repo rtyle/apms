@@ -78,9 +78,12 @@ For bench testing, a grove to 4-pin extension connector and a breadboard are con
     [Amazon](https://www.amazon.com/dp/B07JMNGBRG)
   
 Optionally, by using a T-valve adapter off the tank's Schrader valve, pressure can be monitored and maintained.
+The maintenance port on the T-valve adapter should be capped when not in use.
 
 * [HawksHead T-Valve Adapter for TMPS Tires (TV1A)](https://www.hawksheadsystems.com/t%20valve%20adapters.html)
     [tpms.ca](https://tpms.ca/products/t-valve-adapters)
+* [Milton High Performance Hex Head Valve Cap (s-435)](https://miltonindustries.com/products/high-performance-hex-head-valve-cap)
+    [Amazon](https://www.amazon.com/dp/B000CONUGU)
 
 For bench testing, a capped tank valve can substitute for the expansion tank.
 
