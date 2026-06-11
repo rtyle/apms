@@ -2,6 +2,8 @@
 substitutions:
   update_interval: 60
 
+  rotation: 0
+
   mbar_per_psi: 68.94757
   barometric_pressure_psi: 14.696
   barometric_pressure_mbar: ${mbar_per_psi * barometric_pressure_psi}
@@ -217,7 +219,7 @@ script:
   - id: pressure_measurement_watchdog_
     mode: restart
     then:
-      - delay: ${update_interval +10}s
+      - delay: ${update_interval + 10}s
       - logger.log:
           level: ERROR
           format: "${name} pressure measurement failure (was ${pressure_format} ${pressure.unit})"
@@ -475,19 +477,19 @@ sensor:
       - temperature_celsius_
       - barometric_pressure_
     lambda: |-
-      // PV = nRT ⇒ n/V = P/(R·T)
-      // P is absolute pressure (gauge + barometric) in Pa (kg/(m·s²), 100 Pa = 1 mbar)
+      // pV = nRT ⇒ n/V = p/(R·T)
+      // p is absolute pressure (gauge + barometric) in Pa (kg/(m·s²), 100 Pa = 1 mbar)
       // V is volume in m³
       // n is moles in mol
       // R is ideal gas constant in kg·m²/(s²·mol·K) (8.31446)
-      // T is temperature in kelvin (273.15 K = 0 °C)
+      // T is absolute temperature in kelvin (273.15 K = 0 °C)
       static auto constexpr pascal_per_mbar{100.0f};
       static auto constexpr kelvin_offset_celsius{273.15f};
       static auto constexpr R{8.31446f};
       auto const [gp, t, bp]{id(molar_density_).consume()};
-      auto const P{pascal_per_mbar * (*gp + *bp)};
+      auto const p{pascal_per_mbar * (*gp + *bp)};
       auto const T{kelvin_offset_celsius + *t};
-      return P / (R * T);	// = n / V
+      return p / (R * T);	// = n / V
     on_value:
       - logger.log:
           level: INFO
@@ -523,6 +525,7 @@ image:
     transparency: alpha_channel
 
 lvgl:
+  rotation: ${rotation}
   pages:
     - widgets:
         - image:
