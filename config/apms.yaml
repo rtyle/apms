@@ -505,6 +505,13 @@ sensor:
           id: molar_density_label_
           text: !lambda return str_sprintf("${molar_density.format}", x);
 
+  - id: sht3xd_
+    platform: sht3xd
+    i2c_id: ${i2c}
+    humidity:
+      id: sht3xd_humidity_
+      name: humidity
+
 image:
   - id: apms_
     file: apms.png
