@@ -185,9 +185,12 @@ For example,
     esphome \
         -s name apms-tank\
         -s smtp false\
+        -s pressure_mbar_threshold 5000\
         -s pressure_unit mbar\
         -s temperature_unit celsius\
         -s logger_level DEBUG\
+        -s debug true\
+        -s rotation 90\
         config main.yaml
 
 By default, `${name}` in the yaml configuration, is substituted with `apms`.
