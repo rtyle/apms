@@ -246,6 +246,11 @@ By pressing the integrated display button, **apms** will rotate through its spla
 Holding the button will dim the display to the desired brightness, including off.
 The display can be restored to full brightness with another button hold (or press).
 
+It is important that a system that measures pressure does not affect the pressure being measured by introducing a leak.
+Monitoring molar density ([mol](https://en.wikipedia.org/wiki/Mole_(unit))/[m³](https://en.wikipedia.org/wiki/Volume), derived from absolute pressure and absolute temperature per the [ideal gas law](https://en.wikipedia.org/wiki/Ideal_gas_law)),
+is a great way to detect a leak.
+In a closed system with no leaks, molar density should not change – regardless of temperature changes.
+
 [Homey](https://homey.app/) integration can be done using [ESPHome Controller](https://homey.app/en-us/app/com.ugrbnk.esphome/ESPHome-Controller)'s
 ESPHome Device. Name the device, identify it by a static IP address or dynamic mDNS name (e.g. apms.local) and enter the api-key from secrets.yaml. Use [Homey Insights](https://homey.app/en-us/features/insights/) to track the pressure and temperature which should be related per the [ideal gas law](https://en.wikipedia.org/wiki/Ideal_gas_law). Use the device in an [advanced flow](https://homey.app/en-us/features/advanced-flow/) to react to events.
 
