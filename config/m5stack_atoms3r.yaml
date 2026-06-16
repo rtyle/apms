@@ -19,8 +19,8 @@ substitutions:
         scl: GPIO0
         sda: GPIO45
       grove:
-        _0: GPIO1
-        _1: GPIO2
+        - GPIO1
+        - GPIO2
       spi:
         clk: GPIO15
         mosi: GPIO21
@@ -30,14 +30,13 @@ substitutions:
         reset: GPIO48
         cs: GPIO14
     atom_bus:
-      _0:
-        _0: GPIO39
-        _1: GPIO38
-      _1:
-        _1: GPIO5
-        _2: GPIO6
-        _3: GPIO7
-        _4: GPIO8
+      - - GPIO39
+        - GPIO38
+      - - null
+        - GPIO5
+        - GPIO6
+        - GPIO7
+        - GPIO8
 
 external_components: 
   - source: github://m5stack/esphome-yaml/components@main
@@ -76,8 +75,8 @@ i2c:
       ignore_strapping_warning: true
     scan: true
   - id: ${m5stack_atoms3r.id.i2c_grove}
-    scl: ${m5stack_atoms3r.gpio.grove._0}
-    sda: ${m5stack_atoms3r.gpio.grove._1}
+    scl: ${m5stack_atoms3r.gpio.grove[0]}
+    sda: ${m5stack_atoms3r.gpio.grove[1]}
     scan: true
 
 lp5562:
