@@ -2,6 +2,9 @@
 # command line substitution values will always be typed as strings
 # even though the same values parsed from yaml would be typed otherwise.
 substitutions:
+  name: apms
+  logger_level: INFO
+
   update_interval: 60
 
   rotation: 0
@@ -147,6 +150,9 @@ packages:
   - ${apms_smtp if smtp in [true, 'true'] else {}}
   - ${apms_debug if debug in [true, 'true'] else {}}
   - !include ${name}_.yaml
+
+logger:
+  level: ${logger_level}
 
 ota:
   - id: ota_

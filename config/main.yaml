@@ -1,9 +1,5 @@
 ---
 
-substitutions:
-  name: apms
-  logger_level: INFO
-
 packages:
   - !include m5stack_atoms3r.yaml
   - !include
@@ -22,6 +18,3 @@ packages:
       display: ${m5stack_atoms3r.id.display}
       button: ${m5stack_atoms3r.id.button}
       display_size: ${m5stack_atoms3r.display.size}
-
-logger:
-  level: ${logger_level}
