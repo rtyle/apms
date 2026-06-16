@@ -211,7 +211,8 @@ display:
     update_interval: never
 
 interval:
-  - interval: ${update_interval}s
+  - id: update_
+    interval: ${update_interval}s
     then:
       - lambda: id(molar_density_).consume(); // any stale values
       - component.update: tem3200_
@@ -375,8 +376,8 @@ sensor:
         - component.update: temperature_fahrenheit_
 
   - id: pressure_psi_
-    platform: template
     name: pressure psi
+    platform: template
     update_interval: never
     unit_of_measurement: psi
     state_class: measurement
@@ -390,8 +391,8 @@ sensor:
     on_value: ${pressure_unit_on_value if pressure.unit == "psi" else []}
 
   - id: pressure_mbar_
-    platform: template
     name: pressure mbar
+    platform: template
     update_interval: never
     unit_of_measurement: mbar
     state_class: measurement
@@ -408,8 +409,8 @@ sensor:
         - lambda: id(molar_density_).curry(id(pressure_mbar_));
 
   - id: temperature_celsius_
-    platform: template
     name: temperature celsius
+    platform: template
     update_interval: never
     unit_of_measurement: °C
     state_class: measurement
@@ -422,8 +423,8 @@ sensor:
         - lambda: id(molar_density_).curry(id(temperature_celsius_));
 
   - id: temperature_fahrenheit_
-    platform: template
     name: temperature fahrenheit
+    platform: template
     update_interval: never
     unit_of_measurement: °F
     state_class: measurement
@@ -454,8 +455,8 @@ sensor:
         - lambda: id(molar_density_).curry(id(barometric_pressure_));
 
   - id: barometric_pressure_psi_
-    platform: template
     name: barometric pressure psi
+    platform: template
     update_interval: never
     unit_of_measurement: psi
     state_class: measurement
@@ -464,8 +465,8 @@ sensor:
     lambda: return id(barometric_pressure_).state / ${pressure.mbar.per_psi};
 
   - id: barometric_pressure_mbar_
-    platform: template
     name: barometric pressure mbar
+    platform: template
     update_interval: never
     unit_of_measurement: mbar
     state_class: measurement
@@ -474,8 +475,8 @@ sensor:
     lambda: return id(barometric_pressure_).state;  // 1 hPa = 1 mbar
 
   - id: molar_density_
-    platform: composition_
     name: molar density
+    platform: composition_
     unit_of_measurement: mol/m³
     state_class: measurement
     device_class: ""
