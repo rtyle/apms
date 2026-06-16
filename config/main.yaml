@@ -1,5 +1,3 @@
----
-
 packages:
   - !include m5stack_atoms3r.yaml
   - !include
