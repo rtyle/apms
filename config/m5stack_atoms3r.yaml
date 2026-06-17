@@ -1,9 +1,9 @@
 substitutions:
   # package vars must override these invalid defaults
+  spi_interface: null
+  spi: null
   lp5562: null
   output: null
-  spi: null
-  spi_interface: null
   i2c: null
   i2c_grove: null
   light: null

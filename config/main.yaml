@@ -2,10 +2,10 @@ packages:
   - !include
     file: m5stack_atoms3r.yaml
     vars:
+      spi_interface: spi2
+      spi: spi_
       lp5562: lp5562_
       output: output_
-      spi: spi_
-      spi_interface: spi2
       i2c: i2c_
       i2c_grove: i2c_grove_
       light: light_
