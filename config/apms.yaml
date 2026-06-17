@@ -106,6 +106,7 @@ substitutions:
     mbar: ${(barometric_pressure_mbar | float)}
 
   pressure:
+    measurement_watchdog_interval: ${(update_interval | int) + 10}
     measurement_alarm: pressure_measurement_alarm_
     threshold_alarm: pressure_threshold_alarm_
     raw:
@@ -235,7 +236,7 @@ script:
   - id: pressure_measurement_watchdog_
     mode: restart
     then:
-      - delay: ${update_interval + 10}s
+      - delay: ${pressure.measurement_watchdog_interval}s
       - logger.log:
           level: ERROR
           format: "${name} pressure measurement failure (was ${pressure_format} ${pressure.unit})"
@@ -250,7 +251,7 @@ script:
   - id: barometric_pressure_measurement_watchdog_
     mode: restart
     then:
-      - delay: ${update_interval + 10}s
+      - delay: ${pressure.measurement_watchdog_interval}s
       - logger.log:
           level: ERROR
           format: "${name} barometric pressure measurement failure (was ${pressure_format} ${pressure.unit})"
