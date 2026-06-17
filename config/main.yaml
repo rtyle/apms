@@ -1,18 +1,29 @@
 packages:
-  - !include m5stack_atoms3r.yaml
+  - !include
+    file: m5stack_atoms3r.yaml
+    vars:
+      lp5562: lp5562_
+      output: output_
+      spi: spi_
+      spi_interface: spi2
+      i2c: i2c_
+      i2c_grove: i2c_grove_
+      light: light_
+      display: display_
+      button: button_
   - !include
     file: m5stack_atomic_poe_base.yaml
     vars:
-      interface: spi3
-      clk_pin: ${m5stack_atoms3r.atom_bus[1][1]}
-      cs_pin: ${m5stack_atoms3r.atom_bus[1][2]}
-      miso_pin: ${m5stack_atoms3r.atom_bus[1][3]}
-      mosi_pin: ${m5stack_atoms3r.atom_bus[1][4]}
+      ethernet_interface: spi3
+      ethernet_clk_pin: ${m5stack_atoms3r.atom_bus[1][1]}
+      ethernet_cs_pin: ${m5stack_atoms3r.atom_bus[1][2]}
+      ethernet_miso_pin: ${m5stack_atoms3r.atom_bus[1][3]}
+      ethernet_mosi_pin: ${m5stack_atoms3r.atom_bus[1][4]}
   - !include
     file: apms.yaml
     vars:
-      i2c: ${m5stack_atoms3r.id.i2c_grove}
-      light: ${m5stack_atoms3r.id.light}
-      display: ${m5stack_atoms3r.id.display}
-      button: ${m5stack_atoms3r.id.button}
+      i2c: i2c_grove_
+      light: light_
+      display: display_
+      button: button_
       display_size: ${m5stack_atoms3r.display.size}
