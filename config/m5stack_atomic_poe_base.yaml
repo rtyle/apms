@@ -1,3 +1,11 @@
+substitutions:
+  # package vars must override these invalid defaults
+  ethernet_interface: null
+  ethernet_clk_pin: null
+  ethernet_cs_pin: null
+  ethernet_miso_pin: null
+  ethernet_mosi_pin: null
+
 ethernet:
   interface: ${ethernet_interface}
   type: W5500

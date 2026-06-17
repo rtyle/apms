@@ -2,6 +2,13 @@
 # command line substitution values will always be typed as strings
 # even though the same values parsed from yaml would be typed otherwise.
 substitutions:
+  # package vars must override these invalid defaults
+  i2c: null
+  light: null
+  display: null
+  button: null
+  display_size: null
+
   name: apms
   logger_level: INFO
 
