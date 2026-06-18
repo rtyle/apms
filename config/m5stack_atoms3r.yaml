@@ -79,12 +79,12 @@ i2c:
       ignore_strapping_warning: true
     scan: true
   - |
-    ${ {
+    ${{
       "id": i2c_grove,
       "scl": m5stack_atoms3r.gpio.grove[0],
       "sda": m5stack_atoms3r.gpio.grove[1],
       "scan": true
-    } if i2c_grove is not none else None }
+    } if i2c_grove is not none else None}
 
 lp5562:
   id: ${lp5562}
