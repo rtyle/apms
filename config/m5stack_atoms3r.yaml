@@ -1,5 +1,5 @@
 substitutions:
-  # package vars must override these invalid defaults
+  # package vars must override these invalid defaults ...
   spi_interface: null
   spi: null
   lp5562: null
@@ -9,6 +9,8 @@ substitutions:
   light: null
   display: null
   button: null
+  # ... except if i2c_grove is not overridden
+  # the m5stack_atoms3r.gpio.grove pins can be used for something else
 
   m5stack_atoms3r:
     display:
@@ -76,10 +78,13 @@ i2c:
       number: ${m5stack_atoms3r.gpio.i2c.sda}
       ignore_strapping_warning: true
     scan: true
-  - id: ${i2c_grove}
-    scl: ${m5stack_atoms3r.gpio.grove[0]}
-    sda: ${m5stack_atoms3r.gpio.grove[1]}
-    scan: true
+  - |
+    ${ {
+      "id": i2c_grove,
+      "scl": m5stack_atoms3r.gpio.grove[0],
+      "sda": m5stack_atoms3r.gpio.grove[1],
+      "scan": true
+    } if i2c_grove is not none else None }
 
 lp5562:
   id: ${lp5562}
