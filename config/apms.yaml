@@ -25,22 +25,22 @@ substitutions:
   pressure_unit: psi
 
   pressure_psi_precision: 4
-  pressure_psi_range_from: 0
-  pressure_psi_range_to: 100
-  pressure_psi_bound_from: 30
-  pressure_psi_bound_to: 80
+  pressure_psi_range_min: 0
+  pressure_psi_range_max: 100
+  pressure_psi_bound_min: 30
+  pressure_psi_bound_max: 80
 
   pressure_mbar_precision: 1
-  pressure_mbar_range_from: 0
-  pressure_mbar_range_to: 7000
-  pressure_mbar_bound_from: 2000
-  pressure_mbar_bound_to: 5500
+  pressure_mbar_range_min: 0
+  pressure_mbar_range_max: 7000
+  pressure_mbar_bound_min: 2000
+  pressure_mbar_bound_max: 5500
 
   pressure_precision: ${pressure[pressure.unit].precision}
-  pressure_range_from: ${pressure[pressure.unit].range_from}
-  pressure_range_to: ${pressure[pressure.unit].range_to}
-  pressure_bound_from: ${pressure[pressure.unit].bound_from}
-  pressure_bound_to: ${pressure[pressure.unit].bound_to}
+  pressure_range_min: ${pressure[pressure.unit].range_min}
+  pressure_range_max: ${pressure[pressure.unit].range_max}
+  pressure_bound_min: ${pressure[pressure.unit].bound_min}
+  pressure_bound_max: ${pressure[pressure.unit].bound_max}
   pressure_label_text: ${pressure[pressure.unit].label_text}
 
   pressure_format: "%.${pressure_precision}f"
@@ -48,11 +48,11 @@ substitutions:
   pressure_unit_on_value:
     - if:
         condition:
-          lambda: return x < ${pressure_bound_from};
+          lambda: return x < ${pressure_bound_min};
         then:
           - logger.log:
               level: WARN
-              format: "${name} pressure ${pressure_format} ${pressure.unit} < ${pressure_bound_from}"
+              format: "${name} pressure ${pressure_format} ${pressure.unit} < ${pressure_bound_min}"
               args: [x]
           - binary_sensor.template.publish:
               id: ${pressure.bounds_alarm}
@@ -60,11 +60,11 @@ substitutions:
         else:
           - if:
               condition:
-                lambda: return x > ${pressure_bound_to};
+                lambda: return x > ${pressure_bound_max};
               then:
                 - logger.log:
                     level: WARN
-                    format: "${name} pressure ${pressure_format} ${pressure.unit} > ${pressure_bound_to}"
+                    format: "${name} pressure ${pressure_format} ${pressure.unit} > ${pressure_bound_max}"
                     args: [x]
                 - binary_sensor.template.publish:
                     id: ${pressure.bounds_alarm}
@@ -89,16 +89,16 @@ substitutions:
   temperature_unit: fahrenheit
 
   temperature_fahrenheit_precision: 1
-  temperature_fahrenheit_range_from: 0
-  temperature_fahrenheit_range_to: 120
+  temperature_fahrenheit_range_min: 0
+  temperature_fahrenheit_range_max: 120
 
   temperature_celsius_precision: 1
-  temperature_celsius_range_from: -20
-  temperature_celsius_range_to: 50
+  temperature_celsius_range_min: -20
+  temperature_celsius_range_max: 50
 
   temperature_precision: ${temperature[temperature.unit].precision}
-  temperature_range_from: ${temperature[temperature.unit].range_from}
-  temperature_range_to: ${temperature[temperature.unit].range_to}
+  temperature_range_min: ${temperature[temperature.unit].range_min}
+  temperature_range_max: ${temperature[temperature.unit].range_max}
 
   temperature_format: "%.${temperature_precision}f"
 
@@ -112,8 +112,8 @@ substitutions:
         text: !lambda return str_sprintf("${temperature_format}", x);
 
   molar_density_precision: 1
-  molar_density_range_from: 0
-  molar_density_range_to: 400
+  molar_density_range_min: 0
+  molar_density_range_max: 400
 
   barometric_pressure:
     measurement_alarm: barometric_pressure_measurement_alarm_
@@ -130,33 +130,33 @@ substitutions:
     unit: ${pressure_unit}
     psi:
       precision: ${(pressure_psi_precision | int)}
-      range_from: ${(pressure_psi_range_from | int)}
-      range_to: ${(pressure_psi_range_to | int)}
-      bound_from: ${(pressure_psi_bound_from | int)}
-      bound_to: ${(pressure_psi_bound_to | int)}
+      range_min: ${(pressure_psi_range_min | int)}
+      range_max: ${(pressure_psi_range_max | int)}
+      bound_min: ${(pressure_psi_bound_min | int)}
+      bound_max: ${(pressure_psi_bound_max | int)}
       label_text: pressure_psi_label_text_
     mbar:
       precision: ${(pressure_mbar_precision | int)}
-      range_from: ${(pressure_mbar_range_from | int)}
-      range_to: ${(pressure_mbar_range_to | int)}
-      bound_from: ${(pressure_mbar_bound_from | int)}
-      bound_to: ${(pressure_mbar_bound_to | int)}
+      range_min: ${(pressure_mbar_range_min | int)}
+      range_max: ${(pressure_mbar_range_max | int)}
+      bound_min: ${(pressure_mbar_bound_min | int)}
+      bound_max: ${(pressure_mbar_bound_max | int)}
       label_text: pressure_bar_label_text_
       per_psi: 68.94757
   temperature:
     unit: ${temperature_unit}
     fahrenheit:
       precision: ${(temperature_fahrenheit_precision | int)}
-      range_from: ${(temperature_fahrenheit_range_from | int)}
-      range_to: ${(temperature_fahrenheit_range_to | int)}
+      range_min: ${(temperature_fahrenheit_range_min | int)}
+      range_max: ${(temperature_fahrenheit_range_max | int)}
     celsius:
       precision: ${(temperature_celsius_precision | int)}
-      range_from: ${(temperature_celsius_range_from | int)}
-      range_to: ${(temperature_celsius_range_to | int)}
+      range_min: ${(temperature_celsius_range_min | int)}
+      range_max: ${(temperature_celsius_range_max | int)}
   molar_density:
     precision: ${(molar_density_precision | int)}
-    range_from: ${(molar_density_range_from | int)}
-    range_to: ${(molar_density_range_to | int)}
+    range_min: ${(molar_density_range_min | int)}
+    range_max: ${(molar_density_range_max | int)}
     format: "%.${molar_density_precision}f"
   
   apms_smtp: !include apms_smtp.yaml
@@ -589,24 +589,24 @@ lvgl:
                   width: 100%
                   height: 100%
                   scales:
-                    - range_from: ${pressure_range_from}
-                      range_to: ${pressure_range_to}
+                    - range_from: ${pressure_range_min}
+                      range_to: ${pressure_range_max}
                       indicators:
                         - arc:
                             color: red
                             width: 8
-                            start_value: ${pressure_range_from}
-                            end_value: ${pressure_bound_from}
+                            start_value: ${pressure_range_min}
+                            end_value: ${pressure_bound_min}
                         - arc:
                             color: green
                             width: 8
-                            start_value: ${pressure_bound_from}
-                            end_value: ${pressure_bound_to}
+                            start_value: ${pressure_bound_min}
+                            end_value: ${pressure_bound_max}
                         - arc:
                             color: red
                             width: 8
-                            start_value: ${pressure_bound_to}
-                            end_value: ${pressure_range_to}
+                            start_value: ${pressure_bound_max}
+                            end_value: ${pressure_range_max}
               - image:
                   src: pressure_scale_
                   align: CENTER
@@ -617,8 +617,8 @@ lvgl:
                   height: 100%
                   hidden: true
                   scales:
-                    - range_from: ${math.pow(10, pressure_precision) * pressure_range_from}
-                      range_to: ${math.pow(10, pressure_precision) * pressure_range_to}
+                    - range_from: ${math.pow(10, pressure_precision) * pressure_range_min}
+                      range_to: ${math.pow(10, pressure_precision) * pressure_range_max}
                       indicators:
                         - line:
                             id: pressure_indicator_
@@ -648,8 +648,8 @@ lvgl:
                   height: 100%
                   hidden: true
                   scales:
-                    - range_from: ${math.pow(10, temperature_precision) * temperature_range_from}
-                      range_to: ${math.pow(10, temperature_precision) * temperature_range_to}
+                    - range_from: ${math.pow(10, temperature_precision) * temperature_range_min}
+                      range_to: ${math.pow(10, temperature_precision) * temperature_range_max}
                       indicators:
                         - line:
                             id: temperature_indicator_
@@ -679,8 +679,8 @@ lvgl:
                   height: 100%
                   hidden: true
                   scales:
-                    - range_from: ${math.pow(10, molar_density.precision) * molar_density.range_from}
-                      range_to: ${math.pow(10, molar_density.precision) * molar_density.range_to}
+                    - range_from: ${math.pow(10, molar_density.precision) * molar_density.range_min}
+                      range_to: ${math.pow(10, molar_density.precision) * molar_density.range_max}
                       indicators:
                         - line:
                             id: molar_density_indicator_
