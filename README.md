@@ -189,8 +189,8 @@ For example,
         -s name apms-tank\
         -s smtp false\
         -s pressure_unit mbar\
-        -s pressure_mbar_bind_from 2500\
-        -s pressure_mbar_bind_to 5000\
+        -s pressure_mbar_bound_from 2500\
+        -s pressure_mbar_bound_to 5000\
         -s temperature_unit celsius\
         -s logger_level DEBUG\
         -s debug true\

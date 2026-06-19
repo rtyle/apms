@@ -27,20 +27,20 @@ substitutions:
   pressure_psi_precision: 4
   pressure_psi_range_from: 0
   pressure_psi_range_to: 100
-  pressure_psi_bind_from: 30
-  pressure_psi_bind_to: 80
+  pressure_psi_bound_from: 30
+  pressure_psi_bound_to: 80
 
   pressure_mbar_precision: 1
   pressure_mbar_range_from: 0
   pressure_mbar_range_to: 7000
-  pressure_mbar_bind_from: 2000
-  pressure_mbar_bind_to: 5500
+  pressure_mbar_bound_from: 2000
+  pressure_mbar_bound_to: 5500
 
   pressure_precision: ${pressure[pressure.unit].precision}
   pressure_range_from: ${pressure[pressure.unit].range_from}
   pressure_range_to: ${pressure[pressure.unit].range_to}
-  pressure_bind_from: ${pressure[pressure.unit].bind_from}
-  pressure_bind_to: ${pressure[pressure.unit].bind_to}
+  pressure_bound_from: ${pressure[pressure.unit].bound_from}
+  pressure_bound_to: ${pressure[pressure.unit].bound_to}
   pressure_label_text: ${pressure[pressure.unit].label_text}
 
   pressure_format: "%.${pressure_precision}f"
@@ -48,11 +48,11 @@ substitutions:
   pressure_unit_on_value:
     - if:
         condition:
-          lambda: return x < ${pressure_bind_from};
+          lambda: return x < ${pressure_bound_from};
         then:
           - logger.log:
               level: WARN
-              format: "${name} pressure ${pressure_format} ${pressure.unit} < ${pressure_bind_from}"
+              format: "${name} pressure ${pressure_format} ${pressure.unit} < ${pressure_bound_from}"
               args: [x]
           - binary_sensor.template.publish:
               id: ${pressure.bounds_alarm}
@@ -60,11 +60,11 @@ substitutions:
         else:
           - if:
               condition:
-                lambda: return x > ${pressure_bind_to};
+                lambda: return x > ${pressure_bound_to};
               then:
                 - logger.log:
                     level: WARN
-                    format: "${name} pressure ${pressure_format} ${pressure.unit} > ${pressure_bind_to}"
+                    format: "${name} pressure ${pressure_format} ${pressure.unit} > ${pressure_bound_to}"
                     args: [x]
                 - binary_sensor.template.publish:
                     id: ${pressure.bounds_alarm}
@@ -132,15 +132,15 @@ substitutions:
       precision: ${(pressure_psi_precision | int)}
       range_from: ${(pressure_psi_range_from | int)}
       range_to: ${(pressure_psi_range_to | int)}
-      bind_from: ${(pressure_psi_bind_from | int)}
-      bind_to: ${(pressure_psi_bind_to | int)}
+      bound_from: ${(pressure_psi_bound_from | int)}
+      bound_to: ${(pressure_psi_bound_to | int)}
       label_text: pressure_psi_label_text_
     mbar:
       precision: ${(pressure_mbar_precision | int)}
       range_from: ${(pressure_mbar_range_from | int)}
       range_to: ${(pressure_mbar_range_to | int)}
-      bind_from: ${(pressure_mbar_bind_from | int)}
-      bind_to: ${(pressure_mbar_bind_to | int)}
+      bound_from: ${(pressure_mbar_bound_from | int)}
+      bound_to: ${(pressure_mbar_bound_to | int)}
       label_text: pressure_bar_label_text_
       per_psi: 68.94757
   temperature:
@@ -596,16 +596,16 @@ lvgl:
                             color: red
                             width: 8
                             start_value: ${pressure_range_from}
-                            end_value: ${pressure_bind_from}
+                            end_value: ${pressure_bound_from}
                         - arc:
                             color: green
                             width: 8
-                            start_value: ${pressure_bind_from}
-                            end_value: ${pressure_bind_to}
+                            start_value: ${pressure_bound_from}
+                            end_value: ${pressure_bound_to}
                         - arc:
                             color: red
                             width: 8
-                            start_value: ${pressure_bind_to}
+                            start_value: ${pressure_bound_to}
                             end_value: ${pressure_range_to}
               - image:
                   src: pressure_scale_
