@@ -9,6 +9,8 @@ substitutions:
   button: null
   display_size: null
 
+  # substitutions that may be overridden on the esphome command line ...
+
   name: apms
   logger_level: INFO
 
@@ -35,6 +37,25 @@ substitutions:
   pressure_mbar_range_max: 7000
   pressure_mbar_bound_min: 2000
   pressure_mbar_bound_max: 5500
+
+  temperature_unit: fahrenheit
+
+  temperature_fahrenheit_precision: 1
+  temperature_fahrenheit_range_min: 0
+  temperature_fahrenheit_range_max: 120
+
+  temperature_celsius_precision: 1
+  temperature_celsius_range_min: -20
+  temperature_celsius_range_max: 50
+
+  molar_density_precision: 1
+  molar_density_range_min: 0
+  molar_density_range_max: 400
+
+  smtp: true
+  debug: false
+
+  # substitutions that may NOT be overridden on the esphome command line ...
 
   pressure_precision: ${pressure[pressure.unit].precision}
   pressure_range_min: ${pressure[pressure.unit].range_min}
@@ -86,16 +107,6 @@ substitutions:
   barometric_pressure_state: id(barometric_pressure_${pressure.unit}_).state
   pressure_state: id(pressure_${pressure.unit}_).state
 
-  temperature_unit: fahrenheit
-
-  temperature_fahrenheit_precision: 1
-  temperature_fahrenheit_range_min: 0
-  temperature_fahrenheit_range_max: 120
-
-  temperature_celsius_precision: 1
-  temperature_celsius_range_min: -20
-  temperature_celsius_range_max: 50
-
   temperature_precision: ${temperature[temperature.unit].precision}
   temperature_range_min: ${temperature[temperature.unit].range_min}
   temperature_range_max: ${temperature[temperature.unit].range_max}
@@ -110,10 +121,6 @@ substitutions:
     - lvgl.label.update:
         id: temperature_label_
         text: !lambda return str_sprintf("${temperature_format}", x);
-
-  molar_density_precision: 1
-  molar_density_range_min: 0
-  molar_density_range_max: 400
 
   barometric_pressure:
     measurement_alarm: barometric_pressure_measurement_alarm_
@@ -160,10 +167,7 @@ substitutions:
     format: "%.${molar_density_precision}f"
   
   apms_smtp: !include apms_smtp.yaml
-  smtp: true
-
   apms_debug: !include apms_debug.yaml
-  debug: false
   
 external_components:
   - source:
