@@ -8,13 +8,13 @@ packages:
   - !include smtp.yaml
 
 binary_sensor:
-  - id: !extend ${pressure.threshold_alarm}
+  - id: !extend ${pressure.bounds_alarm}
     on_press:
       smtp_.send:
-        subject: !lambda return str_sprintf("${name} pressure (${pressure_format} ${pressure.unit}) >= ${pressure_threshold}", ${pressure_state});
+        subject: !lambda return str_sprintf("${name} pressure (${pressure_format} ${pressure.unit}) >= ${pressure_bind_to}", ${pressure_state});
     on_release:
       smtp_.send:
-        subject: !lambda return str_sprintf("${name} pressure ${pressure_format} ${pressure.unit} < ${pressure_threshold}", ${pressure_state});
+        subject: !lambda return str_sprintf("${name} pressure ${pressure_format} ${pressure.unit} < ${pressure_bind_to}", ${pressure_state});
 
   - id: !extend ${pressure.measurement_alarm}
     on_press:
