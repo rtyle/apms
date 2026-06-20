@@ -134,7 +134,7 @@ substitutions:
     raw:
       psi_0: ${(pressure_raw_psi_0 | int)}
       psi_100: ${(pressure_raw_psi_100 | int)}
-    unit: ${pressure_unit}
+    unit: ${pressure_unit | lower}
     psi:
       precision: ${(pressure_psi_precision | int)}
       range_min: ${(pressure_psi_range_min | int)}
@@ -151,7 +151,7 @@ substitutions:
       label_text: pressure_bar_label_text_
       per_psi: 68.94757
   temperature:
-    unit: ${temperature_unit}
+    unit: ${temperature_unit | lower}
     fahrenheit:
       precision: ${(temperature_fahrenheit_precision | int)}
       range_min: ${(temperature_fahrenheit_range_min | int)}
