@@ -72,6 +72,7 @@ substitutions:
   pressure_format: "%.${pressure_precision}f"
 
   barometric_pressure_state: id(barometric_pressure_${pressure.unit}_).state
+
   pressure_state: id(pressure_${pressure.unit}_).state
 
   temperature_precision: ${temperature[temperature.unit].precision}
