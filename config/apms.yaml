@@ -1,6 +1,3 @@
-# only top level substitutions can be overridden on the esphome command line.
-# command line substitution values will always be typed as strings
-# even though the same values parsed from yaml would be typed otherwise.
 substitutions:
   # package vars must override these invalid defaults
   i2c: null
@@ -9,7 +6,11 @@ substitutions:
   button: null
   display_size: null
 
-  # substitutions that may be overridden on the esphome command line ...
+  # region
+  # substitutions that may be overridden on the esphome command line.
+  # when overridden, the values will always be typed as strings
+  # even though the same values parsed from yaml would be typed otherwise.
+  # such string values are jinja-filtered to non-string types when needed.
 
   name: apms
   logger_level: INFO
@@ -55,7 +56,11 @@ substitutions:
   smtp: true
   debug: false
 
-  # substitutions that may NOT be overridden on the esphome command line ...
+  # endregion
+
+  # region
+  # substitutions that should not be overridden on the esphome command line.
+  # these are derived from substitutions that may be overridden.
 
   pressure_precision: ${pressure[pressure.unit].precision}
   pressure_range_min: ${pressure[pressure.unit].range_min}
@@ -65,6 +70,66 @@ substitutions:
   pressure_label_text: ${pressure[pressure.unit].label_text}
 
   pressure_format: "%.${pressure_precision}f"
+
+  barometric_pressure_state: id(barometric_pressure_${pressure.unit}_).state
+  pressure_state: id(pressure_${pressure.unit}_).state
+
+  temperature_precision: ${temperature[temperature.unit].precision}
+  temperature_range_min: ${temperature[temperature.unit].range_min}
+  temperature_range_max: ${temperature[temperature.unit].range_max}
+
+  temperature_format: "%.${temperature_precision}f"
+
+  # endregion
+
+  # region
+  # substitutions that can not be overridden on the esphome command line.
+
+  barometric_pressure:
+    measurement_alarm: barometric_pressure_measurement_alarm_
+    psi: ${(barometric_pressure_psi | float)}
+    mbar: ${(barometric_pressure_mbar | float)}
+
+  pressure:
+    measurement_watchdog_interval: ${(update_interval | int) + 10}
+    measurement_alarm: pressure_measurement_alarm_
+    bounds_alarm: pressure_bounds_alarm_
+    raw:
+      psi_0: ${(pressure_raw_psi_0 | int)}
+      psi_100: ${(pressure_raw_psi_100 | int)}
+    unit: ${pressure_unit | lower}
+    psi:
+      precision: ${(pressure_psi_precision | int)}
+      range_min: ${(pressure_psi_range_min | int)}
+      range_max: ${(pressure_psi_range_max | int)}
+      bound_min: ${(pressure_psi_bound_min | int)}
+      bound_max: ${(pressure_psi_bound_max | int)}
+      label_text: pressure_psi_label_text_
+    mbar:
+      precision: ${(pressure_mbar_precision | int)}
+      range_min: ${(pressure_mbar_range_min | int)}
+      range_max: ${(pressure_mbar_range_max | int)}
+      bound_min: ${(pressure_mbar_bound_min | int)}
+      bound_max: ${(pressure_mbar_bound_max | int)}
+      label_text: pressure_bar_label_text_
+      per_psi: 68.94757
+
+  temperature:
+    unit: ${temperature_unit | lower}
+    fahrenheit:
+      precision: ${(temperature_fahrenheit_precision | int)}
+      range_min: ${(temperature_fahrenheit_range_min | int)}
+      range_max: ${(temperature_fahrenheit_range_max | int)}
+    celsius:
+      precision: ${(temperature_celsius_precision | int)}
+      range_min: ${(temperature_celsius_range_min | int)}
+      range_max: ${(temperature_celsius_range_max | int)}
+
+  molar_density:
+    precision: ${(molar_density_precision | int)}
+    range_min: ${(molar_density_range_min | int)}
+    range_max: ${(molar_density_range_max | int)}
+    format: "%.${molar_density_precision}f"
 
   pressure_unit_on_value:
     - if:
@@ -104,15 +169,6 @@ substitutions:
     - lvgl.widget.show: pressure_meter_
     - component.update: ${pressure_label_text}
 
-  barometric_pressure_state: id(barometric_pressure_${pressure.unit}_).state
-  pressure_state: id(pressure_${pressure.unit}_).state
-
-  temperature_precision: ${temperature[temperature.unit].precision}
-  temperature_range_min: ${temperature[temperature.unit].range_min}
-  temperature_range_max: ${temperature[temperature.unit].range_max}
-
-  temperature_format: "%.${temperature_precision}f"
-
   temperature_unit_on_value:
     - lvgl.indicator.update:
         id: temperature_indicator_
@@ -121,53 +177,11 @@ substitutions:
     - lvgl.label.update:
         id: temperature_label_
         text: !lambda return str_sprintf("${temperature_format}", x);
-
-  barometric_pressure:
-    measurement_alarm: barometric_pressure_measurement_alarm_
-    psi: ${(barometric_pressure_psi | float)}
-    mbar: ${(barometric_pressure_mbar | float)}
-
-  pressure:
-    measurement_watchdog_interval: ${(update_interval | int) + 10}
-    measurement_alarm: pressure_measurement_alarm_
-    bounds_alarm: pressure_bounds_alarm_
-    raw:
-      psi_0: ${(pressure_raw_psi_0 | int)}
-      psi_100: ${(pressure_raw_psi_100 | int)}
-    unit: ${pressure_unit | lower}
-    psi:
-      precision: ${(pressure_psi_precision | int)}
-      range_min: ${(pressure_psi_range_min | int)}
-      range_max: ${(pressure_psi_range_max | int)}
-      bound_min: ${(pressure_psi_bound_min | int)}
-      bound_max: ${(pressure_psi_bound_max | int)}
-      label_text: pressure_psi_label_text_
-    mbar:
-      precision: ${(pressure_mbar_precision | int)}
-      range_min: ${(pressure_mbar_range_min | int)}
-      range_max: ${(pressure_mbar_range_max | int)}
-      bound_min: ${(pressure_mbar_bound_min | int)}
-      bound_max: ${(pressure_mbar_bound_max | int)}
-      label_text: pressure_bar_label_text_
-      per_psi: 68.94757
-  temperature:
-    unit: ${temperature_unit | lower}
-    fahrenheit:
-      precision: ${(temperature_fahrenheit_precision | int)}
-      range_min: ${(temperature_fahrenheit_range_min | int)}
-      range_max: ${(temperature_fahrenheit_range_max | int)}
-    celsius:
-      precision: ${(temperature_celsius_precision | int)}
-      range_min: ${(temperature_celsius_range_min | int)}
-      range_max: ${(temperature_celsius_range_max | int)}
-  molar_density:
-    precision: ${(molar_density_precision | int)}
-    range_min: ${(molar_density_range_min | int)}
-    range_max: ${(molar_density_range_max | int)}
-    format: "%.${molar_density_precision}f"
   
   apms_smtp: !include apms_smtp.yaml
   apms_debug: !include apms_debug.yaml
+
+  # endregion
   
 external_components:
   - source:
