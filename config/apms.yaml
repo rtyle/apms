@@ -27,7 +27,7 @@ substitutions:
 
   pressure_unit: psi
 
-  pressure_psi_precision: 4
+  pressure_psi_precision: 3
   pressure_psi_range_min: 0
   pressure_psi_range_max: 100
   pressure_psi_bound_min: 30
@@ -41,15 +41,15 @@ substitutions:
 
   temperature_unit: fahrenheit
 
-  temperature_fahrenheit_precision: 1
+  temperature_fahrenheit_precision: 2
   temperature_fahrenheit_range_min: 0
   temperature_fahrenheit_range_max: 120
 
-  temperature_celsius_precision: 1
+  temperature_celsius_precision: 2
   temperature_celsius_range_min: -20
   temperature_celsius_range_max: 50
 
-  molar_density_precision: 1
+  molar_density_precision: 2
   molar_density_range_min: 0
   molar_density_range_max: 400
 
