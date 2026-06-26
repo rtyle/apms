@@ -4,6 +4,7 @@ substitutions:
   light: null
   display: null
   button: null
+  motion: null
   display_size: null
 
   # region
@@ -255,8 +256,7 @@ display:
     update_interval: never
 
 interval:
-  - id: update_
-    interval: ${update_interval}s
+  - interval: ${update_interval}s
     then:
       - lambda: id(molar_density_).consume(); // any stale values
       - component.update: tem3200_
@@ -268,6 +268,11 @@ interval:
           then:
             lambda: id(molar_density_).curry(id(barometric_pressure_), ${barometric_pressure.mbar});
 
+  - interval: 250ms
+    then:
+      - component.update: ${motion}
+      - component.update: rotation_
+      
 script:
   - id: pressure_measurement_watchdog_
     mode: restart
@@ -395,7 +400,59 @@ binary_sensor:
     device_class: problem
     trigger_on_initial_state: true
 
+motion:
+  - id: !extend ${motion}
+    accelerometer_range: 2G
+    accelerometer_odr: 100HZ  # 100HZ default, with hardware low pass filter
+    update_interval: never  # 250ms default
+
 sensor:
+  - id: acceleration_x_
+    name: acceleration x
+    platform: motion
+    motion_id: ${motion}
+    type: acceleration_x
+    internal: true
+
+  - id: acceleration_y_
+    name: acceleration y
+    platform: motion
+    motion_id: ${motion}
+    type: acceleration_y
+    internal: true
+
+  - id: acceleration_z_
+    name: acceleration z
+    platform: motion
+    motion_id: ${motion}
+    type: acceleration_z
+    internal: true
+
+  - id: rotation_
+    name: rotation
+    platform: template
+    lambda: |-
+      auto constexpr tau{2.0f * std::numbers::pi_v<float>};
+      auto constexpr pi_2{std::numbers::pi_v<float> / 2.0f};
+      auto constexpr pi_4{std::numbers::pi_v<float> / 4.0f};
+      auto const x{id(acceleration_x_).state};
+      auto const y{id(acceleration_y_).state};
+      auto const z{id(acceleration_z_).state};
+      auto const ax{std::abs(x)};
+      auto const ay{std::abs(y)};
+      auto const az{std::abs(z)};
+      if (az > ax && az > ay) return {};  // no change
+      auto angle{std::atan2(y, x)};
+      if (angle < 0) angle += tau;
+      return 90.0f * (static_cast<unsigned>(std::floor((angle + pi_4) / pi_2)) % 4);
+    filters:
+      - delta: 0.0
+    on_value:
+      logger.log:
+        level: INFO
+        format: "rotation %f"
+        args: [x]
+
   - id: tem3200_
     platform: tem3200
     i2c_id: ${i2c}
@@ -536,9 +593,9 @@ sensor:
       // n is moles in mol
       // R is ideal gas constant in kg·m²/(s²·mol·K) (8.31446)
       // T is absolute temperature in kelvin (273.15 K = 0 °C)
-      static auto constexpr pascal_per_mbar{100.0f};
-      static auto constexpr kelvin_offset_celsius{273.15f};
-      static auto constexpr R{8.31446f};
+      auto constexpr pascal_per_mbar{100.0f};
+      auto constexpr kelvin_offset_celsius{273.15f};
+      auto constexpr R{8.31446f};
       auto const [gp, t, bp]{id(molar_density_).consume()};
       auto const p{pascal_per_mbar * (*gp + *bp)};
       auto const T{kelvin_offset_celsius + *t};

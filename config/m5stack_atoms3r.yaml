@@ -9,6 +9,7 @@ substitutions:
   light: null
   display: null
   button: null
+  motion: null
   # ... except if i2c_grove is not overridden
   # the m5stack_atoms3r.gpio.grove pins can be used for something else
 
@@ -125,3 +126,13 @@ display:
       offset_height: 1
       offset_width: 2
     invert_colors: true
+
+motion:
+  - id: ${motion}
+    platform: bmi270
+    i2c_id: ${i2c}
+    axis_map:
+      x: x
+      y: "-y"
+      z: z
+

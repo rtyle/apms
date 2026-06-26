@@ -11,6 +11,7 @@ packages:
       light: light_
       display: display_
       button: button_
+      motion: motion_
   - !include
     file: m5stack_atomic_poe_base.yaml
     vars:
@@ -26,4 +27,5 @@ packages:
       light: light_
       display: display_
       button: button_
+      motion: motion_
       display_size: ${m5stack_atoms3r.display.size}
