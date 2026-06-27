@@ -431,6 +431,11 @@ sensor:
   - id: rotation_
     name: rotation
     platform: template
+    update_interval: never
+    unit_of_measurement: °
+    state_class: measurement
+    device_class: ""
+    accuracy_decimals: 0
     lambda: |-
       static auto constexpr tau{2.0f * std::numbers::pi_v<float>};
       static auto constexpr tau_4{tau / 4.0f};
@@ -444,7 +449,7 @@ sensor:
       if (angle < 0) angle += tau;  // [0, tau]
       return 90.0f * (static_cast<int>(std::floor((angle + tau_8) / tau_4)) % 4); // {0, 90, 180, 270}
     filters:
-      - delta: 0.0	# filter out unless there is a change in value
+      - delta: 0.0 # filter out unless there is a change in value
     on_value:
       - logger.log:
           level: INFO
