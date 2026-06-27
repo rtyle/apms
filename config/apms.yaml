@@ -448,11 +448,13 @@ sensor:
     filters:
       - delta: 0.0
     on_value:
-      logger.log:
-        level: INFO
-        format: "rotation %f"
-        args: [x]
-
+      - logger.log:
+          level: INFO
+          format: "rotation %f"
+          args: [x]
+      # https://github.com/esphome/esphome/issues/17227
+      # - lambda: |-
+      #     id(lvgl_).set_rotation(static_cast<display::DisplayRotation>(static_cast<int>(x)));
   - id: tem3200_
     platform: tem3200
     i2c_id: ${i2c}
@@ -642,6 +644,7 @@ image:
     transparency: alpha_channel
 
 lvgl:
+  id: lvgl_
   rotation: ${rotation}
   pages:
     - widgets:
