@@ -403,7 +403,7 @@ binary_sensor:
 motion:
   - id: !extend ${motion}
     accelerometer_range: 2G
-    accelerometer_odr: 100HZ  # 100HZ default, with hardware low pass filter
+    accelerometer_odr: 12_5HZ  # 100HZ default
     update_interval: never  # 250ms default
 
 sensor:
@@ -432,21 +432,19 @@ sensor:
     name: rotation
     platform: template
     lambda: |-
-      auto constexpr tau{2.0f * std::numbers::pi_v<float>};
-      auto constexpr pi_2{std::numbers::pi_v<float> / 2.0f};
-      auto constexpr pi_4{std::numbers::pi_v<float> / 4.0f};
+      static auto constexpr tau{2.0f * std::numbers::pi_v<float>};
+      static auto constexpr tau_4{tau / 4.0f};
+      static auto constexpr tau_8{tau / 8.0f};
       auto const x{id(acceleration_x_).state};
       auto const y{id(acceleration_y_).state};
       auto const z{id(acceleration_z_).state};
-      auto const ax{std::abs(x)};
-      auto const ay{std::abs(y)};
-      auto const az{std::abs(z)};
-      if (az > ax && az > ay) return {};  // no change
-      auto angle{std::atan2(y, x)};
-      if (angle < 0) angle += tau;
-      return 90.0f * (static_cast<unsigned>(std::floor((angle + pi_4) / pi_2)) % 4);
+      auto const abs_z{std::abs(z)};
+      if (abs_z > std::abs(x) && abs_z > std::abs(y)) return {};  // no value
+      auto angle{std::atan2(y, x)}; // [-pi, pi]
+      if (angle < 0) angle += tau;  // [0, tau]
+      return 90.0f * (static_cast<int>(std::floor((angle + tau_8) / tau_4)) % 4); // {0, 90, 180, 270}
     filters:
-      - delta: 0.0
+      - delta: 0.0	# filter out unless there is a change in value
     on_value:
       - logger.log:
           level: INFO
@@ -595,9 +593,9 @@ sensor:
       // n is moles in mol
       // R is ideal gas constant in kg·m²/(s²·mol·K) (8.31446)
       // T is absolute temperature in kelvin (273.15 K = 0 °C)
-      auto constexpr pascal_per_mbar{100.0f};
-      auto constexpr kelvin_offset_celsius{273.15f};
-      auto constexpr R{8.31446f};
+      static auto constexpr pascal_per_mbar{100.0f};
+      static auto constexpr kelvin_offset_celsius{273.15f};
+      static auto constexpr R{8.31446f};
       auto const [gp, t, bp]{id(molar_density_).consume()};
       auto const p{pascal_per_mbar * (*gp + *bp)};
       auto const T{kelvin_offset_celsius + *t};
