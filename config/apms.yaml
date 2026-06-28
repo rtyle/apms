@@ -432,10 +432,7 @@ sensor:
     name: rotation
     platform: template
     update_interval: never
-    unit_of_measurement: °
-    state_class: measurement
-    device_class: ""
-    accuracy_decimals: 0
+    internal: true
     lambda: |-
       static auto constexpr tau{2.0f * std::numbers::pi_v<float>};
       static auto constexpr tau_4{tau / 4.0f};
@@ -455,9 +452,9 @@ sensor:
           level: INFO
           format: "rotation %f"
           args: [x]
-      # https://github.com/esphome/esphome/issues/17227
-      # - lambda: |-
-      #     id(lvgl_).set_rotation(static_cast<display::DisplayRotation>(static_cast<int>(x)));
+      - lambda: |-
+          id(lvgl_).set_rotation(static_cast<display::DisplayRotation>(static_cast<int>(x)));
+
   - id: tem3200_
     platform: tem3200
     i2c_id: ${i2c}
