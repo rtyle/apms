@@ -79,7 +79,8 @@ i2c:
       number: ${m5stack_atoms3r.gpio.i2c.sda}
       ignore_strapping_warning: true
     scan: true
-  - |
+
+  - |-
     ${{
       "id": i2c_grove,
       "scl": m5stack_atoms3r.gpio.grove[0],

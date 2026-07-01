@@ -216,6 +216,7 @@ globals:
   - id: button_held_
     type: bool
     initial_value: "false"
+
   - id: light_brightness_target_
     type: float
     initial_value: "1.0f"
@@ -408,21 +409,18 @@ motion:
 
 sensor:
   - id: acceleration_x_
-    name: acceleration x
     platform: motion
     motion_id: ${motion}
     type: acceleration_x
     internal: true
 
   - id: acceleration_y_
-    name: acceleration y
     platform: motion
     motion_id: ${motion}
     type: acceleration_y
     internal: true
 
   - id: acceleration_z_
-    name: acceleration z
     platform: motion
     motion_id: ${motion}
     type: acceleration_z
@@ -444,8 +442,8 @@ sensor:
       if ((abs_z > std::abs(x) && abs_z > std::abs(y))          // display is facing mostly up or down
           || (0.1f < std::abs(1.0f - (x * x + y * y + z * z)))) // acceleration deviates significantly from 1G
         return {};
-      auto angle{std::atan2(y, x)}; // [-pi, pi]
-      if (angle < 0) angle += tau;  // [0, tau]
+      auto angle{std::atan2(y, x)};   // [-pi, pi]
+      if (angle < 0.0f) angle += tau; // [0, tau]
       return 90.0f * (static_cast<int>(std::floor((angle + tau_8) / tau_4)) % 4); // {0, 90, 180, 270}
     filters:
       - delta: 0.0 # filter out unless there is a change in value
@@ -629,16 +627,19 @@ image:
     file: apms.png
     type: rgb565
     resize: ${display_size}
+
   - id: pressure_scale_
     file: scale_${pressure.unit}.png
     type: rgb565
     resize: ${display_size}
     transparency: alpha_channel
+
   - id: temperature_scale_
     file: scale_${temperature.unit}.png
     type: rgb565
     resize: ${display_size}
     transparency: alpha_channel
+
   - id: molar_density_scale_
     file: scale_molar_density.png
     type: rgb565
@@ -656,6 +657,7 @@ lvgl:
             on_boot:
               - delay: 4s
               - lvgl.page.next:
+
     - widgets:
         - container:
             widgets:
@@ -710,6 +712,7 @@ lvgl:
                   text_color: white
                   y: 45
                   text: "---"
+
     - widgets:
         - container:
             widgets:
@@ -741,6 +744,7 @@ lvgl:
                   text_color: white
                   y: 45
                   text: "--"
+
     - widgets:
         - container:
             widgets:
