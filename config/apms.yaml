@@ -432,19 +432,19 @@ sensor:
     update_interval: never
     internal: true
     lambda: |-
-      static auto constexpr tau{2.0f * std::numbers::pi_v<float>};
-      static auto constexpr tau_4{tau / 4.0f};
-      static auto constexpr tau_8{tau / 8.0f};
       auto const x{id(acceleration_x_).state};
       auto const y{id(acceleration_y_).state};
       auto const z{id(acceleration_z_).state};
-      auto const abs_x{std::abs(x)};
-      auto const abs_y{std::abs(y)};
-      auto const abs_z{std::abs(z)};
-      if ((abs_z > abs_x && abs_z > abs_y)                      // display is facing mostly up or down
+      auto const ax{std::abs(x)};
+      auto const ay{std::abs(y)};
+      auto const az{std::abs(z)};
+      auto const ax2{ax * 2.0f};
+      auto const ay2{ay * 2.0f};
+      if ((az > ax && az > ay)                                  // display is facing mostly up or down
+          || (ax < ay2 && ay < ax2)                             // diagnonal, not horizontal or vertical  
           || (0.1f < std::abs(1.0f - (x * x + y * y + z * z)))) // acceleration deviates significantly from 1G
         return {};
-      return abs_x < abs_y
+      return ax < ay
         ? (y < 0.0f ? 270.0f : 90.0f)
         : (x < 0.0f ? 180.0f : 0.0f);
     filters:
