@@ -427,7 +427,6 @@ sensor:
     internal: true
 
   - id: rotation_
-    name: rotation
     platform: template
     update_interval: never
     internal: true
