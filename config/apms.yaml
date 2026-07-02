@@ -438,10 +438,8 @@ sensor:
       auto const ax{std::abs(x)};
       auto const ay{std::abs(y)};
       auto const az{std::abs(z)};
-      auto const ax2{ax * 2.0f};
-      auto const ay2{ay * 2.0f};
       if ((az > ax && az > ay)                                  // display is facing mostly up or down
-          || (ax < ay2 && ay < ax2)                             // diagnonal, not horizontal or vertical  
+          || (ax < 2.0f * ay && ay < 2.0f * ax)                 // diagnonal, not horizontal or vertical  
           || (0.1f < std::abs(1.0f - (x * x + y * y + z * z)))) // acceleration deviates significantly from 1G
         return {};
       return ax < ay
