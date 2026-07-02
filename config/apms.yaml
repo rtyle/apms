@@ -438,13 +438,15 @@ sensor:
       auto const x{id(acceleration_x_).state};
       auto const y{id(acceleration_y_).state};
       auto const z{id(acceleration_z_).state};
+      auto const abs_x{std::abs(x)};
+      auto const abs_y{std::abs(y)};
       auto const abs_z{std::abs(z)};
-      if ((abs_z > std::abs(x) && abs_z > std::abs(y))          // display is facing mostly up or down
+      if ((abs_z > abs_x && abs_z > abs_y)                      // display is facing mostly up or down
           || (0.1f < std::abs(1.0f - (x * x + y * y + z * z)))) // acceleration deviates significantly from 1G
         return {};
-      auto angle{std::atan2(y, x)};   // [-pi, pi]
-      if (angle < 0.0f) angle += tau; // [0, tau]
-      return 90.0f * (static_cast<int>(std::floor((angle + tau_8) / tau_4)) % 4); // {0, 90, 180, 270}
+      return abs_x < abs_y
+        ? (y < 0.0f ? 270.0f : 90.0f)
+        : (x < 0.0f ? 180.0f : 0.0f);
     filters:
       - delta: 0.0 # filter out unless there is a change in value
     on_value:
