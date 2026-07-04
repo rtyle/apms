@@ -134,6 +134,7 @@ substitutions:
     format: "%.${molar_density_precision}f"
 
   pressure_unit_on_value:
+    - delay: 1ms # yield
     - if:
         condition:
           lambda: return x < ${pressure_bound_min};
@@ -172,6 +173,7 @@ substitutions:
     - component.update: ${pressure_label_text}
 
   temperature_unit_on_value:
+    - delay: 1ms # yield
     - lvgl.indicator.update:
         id: temperature_indicator_
         value: !lambda return x * ${math.pow(10, ${temperature_precision})};
@@ -259,9 +261,23 @@ display:
 interval:
   - interval: ${update_interval}s
     then:
+      # when our work (a cascade of component.update actions) takes too long the logs will show
+      #   [W][component:###]: interval took a long time for an operation (## ms), max is 50 ms
+      # we inhibit this warning by dividing up our work into chunks that take less than this budget.
+      # chunks are divided by yielding to the scheduler with a tiny delay.
+      # work will resume as a scheduled task.
+      # when a scheduled task takes too long the logs will show
+      #   [W][component:###]: a scheduled task took a long time for an operation (## ms), max is 50 ms
+      # we inhibit this warning by dividing further.
+      # a natural place for these divisions is at the beginning of a sensor's on_value automation.
+      # such sensors normally would have their own update_interval (and budget)
+      # but, for synchronization purposes, we have set them to never
+      # and place them in our component.update cascade.
+      # without a yield in their on_value automation
+      # they would share the budget of that which invoked their component.update.
       - lambda: id(molar_density_).consume(); // any stale values
       - component.update: tem3200_
-      - delay: 1ms # yield
+      - delay: 1ms # yield between i2c transactions
       - component.update: qmp6988_
       - if:
           condition:
@@ -602,6 +618,7 @@ sensor:
       auto const T{kelvin_offset_celsius + *t};
       return p / (R * T);	// = n / V
     on_value:
+      - delay: 1ms # yield
       - logger.log:
           level: INFO
           format: "${name} molar_density ${molar_density.format} mol/m³"
